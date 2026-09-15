@@ -8,8 +8,8 @@
          of its own - it ships inside protobuf-net.Core as analyzer assets - so this reference is
          what brings ProtoModelGenerator and ProtoConnectGenerator along. See Directory.Build.targets,
          and ProtoBufSourcePath there for building against a local protobuf-net checkout instead. -->
-    <PackageVersion Include="protobuf-net.Core" Version="3.4.28" />
-    <PackageVersion Include="protobuf-net" Version="3.4.28" />
+    <PackageVersion Include="protobuf-net.Core" Version="3.4.29" />
+    <PackageVersion Include="protobuf-net" Version="3.4.29" />
   </ItemGroup>
 
   <ItemGroup>
