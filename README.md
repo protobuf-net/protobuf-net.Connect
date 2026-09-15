@@ -3,6 +3,13 @@
 **Experimental.** The [Connect protocol](https://connectrpc.com) for .NET, built for AOT from the
 start — no ref-emit, no runtime marshaller lookup, no reflection on any serving or calling path.
 
+### 📖 Documentation: **[connect.protobuf-net.dev](https://connect.protobuf-net.dev)**
+
+[Getting started](https://connect.protobuf-net.dev/getting-started) ·
+[Contract-first](https://connect.protobuf-net.dev/contract-first) ·
+[JSON](https://connect.protobuf-net.dev/json) ·
+[Performance](https://connect.protobuf-net.dev/performance)
+
 Connect is gRPC's wire semantics over ordinary HTTP. The difference that matters operationally:
 Connect puts trailing metadata **in the body** rather than in HTTP trailers — and HTTP trailers are
 the only reason gRPC insists on HTTP/2.
@@ -52,9 +59,6 @@ they are fair *between the rows*, which is the comparison being made.
 
 At the codec layer, against the same message: binary writes in 338 ns with **zero allocation**, JSON
 in 484 ns / 264 B. See `notes/findings.md` §56–§57 for the full measurements and their traps.
-
-**Documentation: [connect.protobuf-net.dev](https://connect.protobuf-net.dev)** — getting started,
-contract-first, JSON, and the full performance numbers with their caveats.
 
 ## Two ways in
 
