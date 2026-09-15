@@ -32,7 +32,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('src/Directory.Packages.props', 'global.json', '**/*.csproj') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
         restore-keys: ${{ runner.os }}-nuget-
     # ILC shells out to the platform toolchain to link; clang is on the image, zlib is not always
     - name: Install the native toolchain
@@ -74,24 +74,24 @@ jobs:
     # else. The .proto is re-derived from the contracts on every run, so it cannot quietly stop
     # describing the types it is supposed to describe.
     - name: Code-first JSON differential
-      run: dotnet run --project src/ConnectJsonDifferential/ConnectJsonDifferential.csproj
+      run: dotnet run --project tests/ConnectJsonDifferential/ConnectJsonDifferential.csproj
 
     # self-contained: hosts Kestrel on an ephemeral loopback port and calls itself, so it needs
-    # nothing from the network. src/ConnectProbe is deliberately NOT here - it checks interoperability
+    # nothing from the network. tests/ConnectProbe is deliberately NOT here - it checks interoperability
     # against demo.connectrpc.com, and a third party's uptime has no business gating our builds.
     - name: Publish and run the Connect smoke test
       run: |
-        dotnet publish src/AotConnectSmoke/AotConnectSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-connect-smoke
+        dotnet publish tests/AotConnectSmoke/AotConnectSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-connect-smoke
         ./artifacts/aot-connect-smoke/AotConnectSmoke
     - name: Publish and run the code-first JSON AOT smoke test
       run: |
-        dotnet publish src/AotConnectJsonSmoke/AotConnectJsonSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-json-smoke
+        dotnet publish tests/AotConnectJsonSmoke/AotConnectJsonSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-json-smoke
         ./artifacts/aot-json-smoke/AotConnectJsonSmoke
     # One contract, one implementation, one host, served over gRPC and Connect at the same time and
     # called both ways - the claim the whole library rests on, and the only check that exercises it.
     - name: Publish and run the dual-transport smoke test
       run: |
-        dotnet publish src/AotDualHostSmoke/AotDualHostSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-dual-host
+        dotnet publish tests/AotDualHostSmoke/AotDualHostSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-dual-host
         ./artifacts/aot-dual-host/AotDualHostSmoke
 
     # The only EXTERNAL oracle for the protocol itself: connectrpc/conformance drives a real Connect
@@ -110,8 +110,8 @@ jobs:
           "https://github.com/connectrpc/conformance/releases/download/v$VERSION/connectconformance-v$VERSION-Linux-x86_64.tar.gz"
         echo "$SHA  conformance.tar.gz" | sha256sum -c -
         tar xzf conformance.tar.gz connectconformance
-        dotnet publish src/ConnectConformance/ConnectConformance.csproj -c Release -o artifacts/conformance
-        CONF=src/ConnectConformance/conformance-config.yaml
+        dotnet publish tests/ConnectConformance/ConnectConformance.csproj -c Release -o artifacts/conformance
+        CONF=tests/ConnectConformance/conformance-config.yaml
         ./connectconformance --mode server --conf $CONF -- ./artifacts/conformance/ConnectConformance
         ./connectconformance --mode client --conf $CONF -- ./artifacts/conformance/ConnectConformance --client
 
@@ -129,5 +129,5 @@ jobs:
         name: nupkgs
         path: .nupkgs/*.nupkg
 
-    # src/ConnectLoad and src/ConnectBenchmark are deliberately absent: benchmarks are slow and
+    # benchmarks/ConnectLoad and benchmarks/ConnectBenchmark are deliberately absent: benchmarks are slow and
     # machine-sensitive, and these are measurements to re-take rather than thresholds to gate on.
