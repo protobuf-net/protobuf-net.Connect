@@ -91,8 +91,11 @@ jobs:
       run: dotnet restore Build.csproj $PROTOBUF_NET_SOURCE
     - name: Build
       run: dotnet build Build.csproj --no-restore $PROTOBUF_NET_SOURCE
-    - name: Test
-      run: dotnet test Build.csproj --no-build --verbosity normal $PROTOBUF_NET_SOURCE
+    # No `dotnet test` step, deliberately: nothing here is a unit-test project, so it finds nothing
+    # and exits 1. The checks below ARE the test suite - executables that return an exit code, run
+    # against external oracles rather than against our own opinion. See AGENTS.md.
+    - name: Contract-first checks
+      run: dotnet run --project tests/ConnectContractFirst/ConnectContractFirst.csproj --no-build $PROTOBUF_NET_SOURCE
 
     # The code-first JSON mapping, against Google's own JsonFormatter over protoc's C# for the same
     # schema. An EXTERNAL oracle, which is the whole point: a JSON writer and reader of ours would

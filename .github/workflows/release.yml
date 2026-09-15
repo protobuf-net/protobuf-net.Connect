@@ -80,8 +80,10 @@ jobs:
       run: dotnet restore Build.csproj
     - name: Build
       run: dotnet build Build.csproj --no-restore -c Release
-    - name: Test
-      run: dotnet test Build.csproj --no-build -c Release --verbosity normal
+    # No `dotnet test`: nothing here is a unit-test project (see AGENTS.md). The gates below are
+    # the suite, and both compare against something that is not ours.
+    - name: Contract-first checks
+      run: dotnet run --project tests/ConnectContractFirst/ConnectContractFirst.csproj -c Release --no-build
 
     # The same external oracles CI gates on: a protocol or mapping bug that compiles cleanly must not
     # ship. Both compare against something that is not ours - the conformance suite's reference
