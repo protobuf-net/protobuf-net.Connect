@@ -1,0 +1,12 @@
+<Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <!-- Benchmarks do not ship either, and are not run in CI: they are
+         measurements to re-take rather than thresholds to gate on. -->
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <!-- the [ProtoModel]/[ProtoConnect] trigger attributes are [Experimental] -->
+        <NoWarn>$(NoWarn);PBN9001</NoWarn>
+    </PropertyGroup>
+</Project>

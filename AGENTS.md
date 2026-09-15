@@ -1,0 +1,74 @@
+# protobuf-net.Connect — notes for agents
+
+Only non-obvious things live here; the code is the reference for everything else.
+
+## Usage policy
+
+This project does not exclude LLM etc tool usage under human guidance. All responsibility for
+code-quality rests with the human submitter/reviewer; "slop" will be culled without mercy.
+
+## Layout
+
+- **`src/` is the published surface and nothing else is.** A project's folder decides whether it
+  packs: `src/Directory.Build.props` sets `IsPackable=true` and all the package metadata, and
+  `tests/` and `benchmarks/` set it false. Do not add packaging properties to individual projects.
+- `Build.csproj` is a `Microsoft.Build.Traversal` project. It names the three shipping projects
+  explicitly and globs `tests/*` and `benchmarks/*`, so a new project in either is built by CI
+  automatically. `-p:Packing=true` narrows it to the shipping set.
+- **Central package management is on.** Versions go in `/Directory.Packages.props`; leave `Version=`
+  off the `PackageReference`.
+- `notes/` is working notes and is not published. `findings.md` is the running log - it is numbered,
+  and new entries append.
+
+## The build-time tooling lives in the other repository
+
+`ProtoModelGenerator` (serializers) and `ProtoConnectGenerator` (proxies and bindings) are in
+**protobuf-net.BuildTools**, which stays in
+[protobuf-net](https://github.com/protobuf-net/protobuf-net). It is *not a package of its own*: it
+ships inside `protobuf-net.Core` as `analyzers/dotnet/cs/protobuf-net.BuildTools.dll` plus
+`build/protobuf-net.Core.props`, so an ordinary package reference brings it along. That is what makes
+this split viable.
+
+**`PrivateAssets="none"` on the protobuf-net references is load-bearing**, in both the package and
+the source form. NuGet's default dependency edge excludes `Build,Analyzers`, so without it a consumer
+of protobuf-net.Connect gets no generators and no analyzers - and PBN5007, which catches
+authorization being silently dropped from a contract-first service, protects nobody. It is only
+visible in the generated nuspec (`include="All"` versus `exclude="Build,Analyzers"`), which is where
+it was caught.
+
+### Building against unreleased tooling
+
+Shipped protobuf-net.Core 3.4.0 carries `ProtoModelGenerator` and `GrpcProxyGenerator` but **not**
+`ProtoConnectGenerator`, and its `ProtoModelGenerator` predates the JSON half. Until a Core with both
+is published, this repository has to build against a protobuf-net checkout:
+
+```bash
+dotnet build Build.csproj -p:ProtoBufSourcePath=../protobuf-net
+```
+
+`Directory.Build.targets` turns that into project references, via the per-project opt-ins
+`UseProtoBufCore`, `UseProtoBuf` and `UseProtoBufTooling`. CI does the same, by checking protobuf-net
+out alongside.
+
+**A package packed in that mode pins its protobuf-net dependency to the local build's version** and
+must never be published; the build warns. Once Core ships the Connect generator: delete the checkout
+step from the workflow, drop `PROTOBUF_NET_SOURCE`, and bump the versions in
+`Directory.Packages.props`.
+
+## What the checks are for
+
+Nothing here is a unit-test suite, and that is deliberate: every defect this code has had was a place
+where **both of our own ends agreed with each other and neither agreed with the protocol**, which no
+self-test can find by construction. So the gates are external oracles:
+
+- `tests/ConnectConformance` - connectrpc/conformance drives a real client against our server and our
+  client against its reference server. 1492/1700, both directions.
+- `tests/ConnectJsonDifferential` - our canonical JSON against **Google's own formatter**, over
+  protoc's C# for a `.proto` re-derived from the contracts on every run, so the schema cannot quietly
+  stop describing the types. Verify any new check can *fail* before trusting it; three have passed
+  vacuously so far.
+- `tests/AotDualHostSmoke` - one contract over gRPC and Connect on one host, which is the headline
+  claim and was asserted in three places and demonstrated nowhere before it existed.
+
+Everything under `tests/` that publishes native is **run**, not merely published: under AOT the
+reflective fallbacks are simply absent, so a pass means the generated path carried the whole thing.

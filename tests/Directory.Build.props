@@ -1,0 +1,12 @@
+<Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <!-- Nothing under tests/ ships. Conformance harnesses, differentials and native-AOT smokes are
+         all executables that prove something and are then thrown away. -->
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <!-- the [ProtoModel]/[ProtoConnect] trigger attributes are [Experimental] -->
+        <NoWarn>$(NoWarn);PBN9001</NoWarn>
+    </PropertyGroup>
+</Project>

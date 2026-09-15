@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>ProtoBuf.AotConnectJsonSmoke</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- the claim under test. Also turns trim/AOT analysis on for an ordinary build, so a
+         regression is caught without paying for a native publish every time. -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <UseProtoBufTooling>true</UseProtoBufTooling>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- deliberately NOT protobuf-net: no RuntimeTypeModel means there is no reflective path to fall
+         back to even by accident, which is the only way a pass here means anything -->
+    <ProjectReference Include="../../src/protobuf-net.Connect/protobuf-net.Connect.csproj" />
+  </ItemGroup>
+
+</Project>

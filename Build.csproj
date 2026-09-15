@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.Build.Traversal/2.0.19">
+  <PropertyGroup>
+    <!-- The Traversal SDK sets this itself only for a file named dirs.proj; this one is Build.csproj,
+         and what reads it is the .NET 11 SDK, where `dotnet test` expands an IsTraversal project into
+         its ProjectReferences. Without it, `dotnet test Build.csproj` under Microsoft.Testing.Platform
+         reports "No test projects were found" - indistinguishable from not having the fix at all. -->
+    <IsTraversal>true</IsTraversal>
+  </PropertyGroup>
+
+  <!-- The shipping set, named explicitly. `Packing=true` narrows the build to these, so packaging
+       validation is a small build rather than a second full one. -->
+  <ItemGroup>
+    <ProjectReference Include="src\protobuf-net.Connect\*.csproj" />
+    <ProjectReference Include="src\protobuf-net.Connect.AspNetCore\*.csproj" />
+    <ProjectReference Include="src\protobuf-net.Connect.Google\*.csproj" />
+  </ItemGroup>
+
+  <!-- ...and everything that verifies or measures. Picked up by globs, so a new project under
+       tests/ or benchmarks/ is built by CI without anyone remembering to add it here. -->
+  <ItemGroup Condition="$(Packing) != 'true'">
+    <ProjectReference Include="tests\*\*.csproj" />
+    <ProjectReference Include="benchmarks\*\*.csproj" />
+  </ItemGroup>
+</Project>

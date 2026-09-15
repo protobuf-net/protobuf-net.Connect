@@ -1,0 +1,44 @@
+<Project>
+    <!-- chain to the repository-wide props; MSBuild stops at the FIRST Directory.Build.props it
+         finds walking up, so without this the root one never runs for anything under src/ -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <!--
+      Everything here is about SHIPPING. src/ is the published surface and nothing else is; that is
+      the whole reason for the src/tests/benchmarks split, and it means a project's folder decides
+      whether it packs rather than a property someone has to remember.
+    -->
+    <PropertyGroup>
+        <RootNamespace>ProtoBuf.Connect</RootNamespace>
+        <OutputType>Library</OutputType>
+        <IsPackable>true</IsPackable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://protobuf-net.dev</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/protobuf-net/protobuf-net.Connect</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageIcon>protobuf-net.png</PackageIcon>
+        <PackageReleaseNotes>https://github.com/protobuf-net/protobuf-net.Connect/releases</PackageReleaseNotes>
+        <PackageTags>connect;connectrpc;grpc;rpc;protobuf;serialization;aot</PackageTags>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
+        <!-- included explicitly below; pack reads its items from the OUTER build of a multi-targeting
+             project, where the SDK's default globs do not run - so the glob must not be the only
+             thing that finds it, and must not claim it twice -->
+        <DefaultItemExcludes>$(DefaultItemExcludes);readme.md</DefaultItemExcludes>
+
+        <!-- nothing has been published yet, so there is no surface to diff against. Set this once
+             there is a release, and ApiCompat starts failing the build on a removed or narrowed
+             member instead of letting it ship. -->
+        <!-- <PackageValidationBaselineVersion>0.1.0</PackageValidationBaselineVersion> -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)../protobuf-net.png" Pack="true" PackagePath="/" Visible="false" />
+        <!-- each package carries its own readme.md - it is what nuget.org shows on the package page,
+             so it should describe THAT package; anything without one falls back to the repo readme -->
+        <None Include="readme.md" Pack="true" PackagePath="/" Condition="Exists('$(MSBuildProjectDirectory)/readme.md')" />
+        <None Include="$(MSBuildThisFileDirectory)../README.md" Link="readme.md" Pack="true" PackagePath="/readme.md"
+              Visible="false" Condition="!Exists('$(MSBuildProjectDirectory)/readme.md')" />
+    </ItemGroup>
+</Project>

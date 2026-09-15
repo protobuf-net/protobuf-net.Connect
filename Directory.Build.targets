@@ -1,0 +1,72 @@
+<Project>
+    <!-- workaround for deterministic builds; see https://github.com/clairernovotny/DeterministicBuilds -->
+    <PropertyGroup>
+        <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)" />
+    </ItemGroup>
+
+    <!--
+      ===========================================================================================
+      protobuf-net, from a package or from a local checkout.
+
+      The generators this repository depends on - ProtoModelGenerator for the serializers,
+      ProtoConnectGenerator for the proxies and bindings - live in protobuf-net.BuildTools, which
+      stays in the protobuf-net repository and is NOT a package of its own: it ships inside
+      protobuf-net.Core as analyzer assets. So an ordinary PackageReference to protobuf-net or
+      protobuf-net.Core brings the tooling with it, and nothing here has to name BuildTools.
+
+      That is the whole cost of the split, and it is real: a change spanning a generator and this
+      runtime used to be one commit and is now a package round-trip. `ProtoBufSourcePath` is the
+      relief valve - point it at a protobuf-net checkout and every reference below becomes a
+      ProjectReference instead, so the two can still be developed together:
+
+          dotnet build -p:ProtoBufSourcePath=../protobuf-net
+
+      A project opts in by setting one or more of UseProtoBufCore, UseProtoBuf and
+      UseProtoBufTooling, rather than writing the references out; that way the package-versus-source
+      decision is made in one place instead of a dozen.
+      ===========================================================================================
+    -->
+    <PropertyGroup>
+        <_ProtoBufFromSource Condition="'$(ProtoBufSourcePath)' != ''">true</_ProtoBufFromSource>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(_ProtoBufFromSource)' != 'true'">
+        <!-- PrivateAssets="none" for the reason protobuf-net itself opens the same edge: NuGet's
+             default dependency edge excludes Build and Analyzers, so without this a consumer who
+             references only protobuf-net.Connect gets no generators and no analyzers - and PBN5007,
+             which catches authorization being silently dropped from a contract-first service,
+             protects nobody. Verified there by packing and reading the nuspec, not by reasoning. -->
+        <PackageReference Include="protobuf-net.Core" PrivateAssets="none" Condition="'$(UseProtoBufCore)' == 'true'" />
+        <PackageReference Include="protobuf-net" PrivateAssets="none" Condition="'$(UseProtoBuf)' == 'true'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(_ProtoBufFromSource)' == 'true'">
+        <!-- PrivateAssets="none" here too, and for the same reason as the package form: without it
+             pack emits the dependency with exclude="Build,Analyzers" and a consumer of
+             protobuf-net.Connect gets no generators or analyzers. Caught by reading the generated
+             nuspec, which is the only place it is visible. -->
+        <ProjectReference Include="$(ProtoBufSourcePath)/src/protobuf-net.Core/protobuf-net.Core.csproj"
+                          PrivateAssets="none" Condition="'$(UseProtoBufCore)' == 'true'" />
+        <ProjectReference Include="$(ProtoBufSourcePath)/src/protobuf-net/protobuf-net.csproj"
+                          PrivateAssets="none" Condition="'$(UseProtoBuf)' == 'true'" />
+        <!-- from source, the analyzers do not flow through the project reference the way they flow
+             through the package, so the tooling is named explicitly -->
+        <ProjectReference Include="$(ProtoBufSourcePath)/src/protobuf-net.BuildTools/protobuf-net.BuildTools.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"
+                          Condition="'$(UseProtoBufTooling)' == 'true'" />
+    </ItemGroup>
+
+    <!--
+      A pack built in source mode pins its protobuf-net dependency to whatever version the local
+      checkout produced - "3.4.94-g281d95ea80" rather than a real release - which would be a broken
+      package if it ever reached a feed. CI packs this way on purpose, as validation, so this warns
+      rather than fails; the release build must run with ProtoBufSourcePath unset.
+    -->
+    <Target Name="WarnOnSourceModePack" BeforeTargets="GenerateNuspec"
+            Condition="'$(_ProtoBufFromSource)' == 'true' and '$(IsPackable)' == 'true'">
+        <Warning Text="Packing with ProtoBufSourcePath set: the protobuf-net dependency will be pinned to the LOCAL build's version. Validation only - do not publish this package." />
+    </Target>
+</Project>

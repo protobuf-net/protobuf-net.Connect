@@ -1,0 +1,49 @@
+<Project>
+    <!--
+      Shared by src/, tests/ and benchmarks/. Anything about *shipping* a package lives in
+      src/Directory.Build.props instead, so that the thing which distinguishes a library from a test
+      project is one file rather than a condition repeated everywhere.
+    -->
+    <PropertyGroup>
+        <Authors>Marc Gravell</Authors>
+        <Copyright>See https://github.com/protobuf-net/protobuf-net.Connect</Copyright>
+
+        <!-- the same key as protobuf-net itself, carried over deliberately: these assemblies are part
+             of that family, and protobuf-net.Connect declares InternalsVisibleTo for
+             protobuf-net.Connect.AspNetCore with its public key. A new key would mean editing that
+             too, for no gain. -->
+        <SignAssembly>true</SignAssembly>
+        <DelaySign>false</DelaySign>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)ProtoBuf.snk</AssemblyOriginatorKeyFile>
+
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <Features>strict</Features>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)Shared.ruleset</CodeAnalysisRuleset>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+        <NoWarn>NU5105;CS1701;IDE0057;IDE0090;IDE0079;NU5048;RS0026;RS0027</NoWarn>
+
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>embedded</DebugType>
+        <DefaultLanguage>en-US</DefaultLanguage>
+        <IncludeSymbols>false</IncludeSymbols>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <Optimize>true</Optimize>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+        <Deterministic>true</Deterministic>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)'=='Release' and '$(SourceRoot)'==''">
+        <SourceRoot Include="$(MSBuildThisFileDirectory)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+        <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" />
+    </ItemGroup>
+</Project>
