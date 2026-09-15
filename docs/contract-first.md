@@ -67,12 +67,18 @@ and the marshallers `protoc` generated are used unchanged.
 
 ## One thing to know about authorization
 
-> ⚠️ **`[Authorize]` is not inferred on this path.**
+> ⚠️ **`[Authorize]` is not inferred on this path** — and only on this one.
 >
 > `Grpc.AspNetCore.Server` collects endpoint metadata by reflecting over your implementation type.
 > This deliberately does not reflect — that is what makes it AOT-safe — so an authorization attribute
 > on your service class would be **silently dropped**, leaving a more permissive endpoint with no
 > error anywhere.
+
+The [code-first path](getting-started) does carry them, because there is a generator in it: the
+attributes are reconstructed at build time and emitted into the binding. Here there is no generator —
+`MapConnectService` is an ordinary library call and your implementation type reaches it as a runtime
+type argument, so reading its attributes *is* the reflection that was removed. Hence the explicit
+forms below.
 
 Two ways to say it explicitly:
 

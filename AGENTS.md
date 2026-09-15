@@ -86,5 +86,16 @@ self-test can find by construction. So the gates are external oracles:
 - `tests/AotDualHostSmoke` - one contract over gRPC and Connect on one host, which is the headline
   claim and was asserted in three places and demonstrated nowhere before it existed.
 
+  It is also the **endpoint-metadata oracle**, and that check is the reason to keep the two transports
+  in one process. `Grpc.AspNetCore.Server` finds an `[Authorize]` by reflecting over the
+  implementation at startup; `ProtoConnectGenerator` reconstructs the same list at build time and
+  emits constructor calls, because `MapConnectService` does not reflect. The check compares the two
+  endpoints' metadata for the same method, so our build-time answer is measured against grpc-dotnet's
+  reflective one rather than against itself. A dropped attribute has **no symptom** - the build
+  succeeds, the service answers, and the only difference is that anybody may call it - so nothing else
+  here could notice. `IGreeter.AdminAsync` exists solely to carry the attribute and is never called;
+  keep it that way, or registering authorization services would start enforcing it on a method the
+  other checks use.
+
 Everything under `tests/` that publishes native is **run**, not merely published: under AOT the
 reflective fallbacks are simply absent, so a pass means the generated path carried the whole thing.

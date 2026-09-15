@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using ProtoBuf;
 using ProtoBuf.Connect;
 using ProtoBuf.Grpc;
@@ -18,6 +19,17 @@ public interface IGreeter
     Task<HelloReply> SayHelloAsync(HelloRequest request, CallContext context = default);
 
     IAsyncEnumerable<HelloReply> Subscribe(HelloRequest request, CallContext context = default);
+
+    /// <summary>
+    /// Exists to carry an <c>[Authorize]</c> on its implementation, and is never called over either
+    /// transport - see the endpoint-metadata check in Program.cs.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately a method nothing calls: no authorization services are registered here, so the
+    /// attribute is inert, but a future edit that registered them would start enforcing it and would
+    /// break every other check in this file if the attribute sat on a method they use.
+    /// </remarks>
+    Task<HelloReply> AdminAsync(HelloRequest request, CallContext context = default);
 }
 
 [ProtoContract]
@@ -45,6 +57,14 @@ public class GreeterService : IGreeter
             // accidentally talking to the same endpoint twice
             Transport = Describe(context),
         });
+
+    /// <summary>
+    /// The attribute under test. On the implementation rather than the contract, because that is
+    /// where a consumer migrating from gRPC will already have written it.
+    /// </summary>
+    [Authorize(Policy = "admins")]
+    public Task<HelloReply> AdminAsync(HelloRequest request, CallContext context)
+        => Task.FromResult(new HelloReply { Message = "admin", Transport = Describe(context) });
 
     public async IAsyncEnumerable<HelloReply> Subscribe(HelloRequest request, CallContext context)
     {

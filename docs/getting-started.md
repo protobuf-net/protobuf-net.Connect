@@ -109,7 +109,52 @@ app.Run();
 
 Each method becomes **its own endpoint**, so `[Authorize]`, CORS policies, rate limiting and output
 caching attach per RPC — ASP.NET Core resolves all of those from the matched endpoint, in middleware
-that runs before any handler.
+that runs before any handler. Write them on your implementation, as you would under gRPC:
+
+```csharp
+public class GreeterService : IGreeter
+{
+    [Authorize(Policy = "admins")]
+    public Task<HelloReply> SayHelloAsync(HelloRequest request, CallContext context) => ...
+
+    [AllowAnonymous]
+    public IAsyncEnumerable<HelloReply> Subscribe(HelloRequest request, CallContext context) => ...
+}
+```
+
+**Nothing reflects to find those.** `Grpc.AspNetCore.Server` discovers them by reflecting over your
+implementation at startup; here they are reconstructed at *build* time, and the generator emits the
+constructor calls into the binding. The list and its order match what gRPC computes, so a contract
+served over both transports gets the same answer from each — attributes on the contract interface
+count too, most-specific last, which is what lets a per-method `[AllowAnonymous]` beat a class-level
+`[Authorize]`.
+
+Your own attributes are carried as well as the framework's, so `endpoint.Metadata.GetMetadata<T>()`
+finds them.
+
+> **Version note.** This comes from protobuf-net's build-time tooling rather than from this package,
+> so it needs a protobuf-net **newer than 3.4.28** — the release that first carried the Connect
+> generator. On 3.4.28 itself the attributes are not carried at all; until you upgrade, put the policy
+> on the binding with `.RequireAuthorization(...)` as below.
+
+### When an attribute cannot be reconstructed
+
+An attribute the generated file cannot *name* — one `internal` to another assembly, say — cannot be
+constructed either, and that is **PBN5008**. There is no fallback, because nothing on this path
+reflects: that operation is bound with **no metadata at all**, so an `[Authorize]` on it would not be
+honoured. It is reported per operation, and the rest of the service is unaffected.
+
+The failure is silent by nature — the build succeeds, the service answers, and the only difference is
+that anybody may call it — so this is the rule here worth escalating:
+
+```xml
+<WarningsAsErrors>$(WarningsAsErrors);PBN5008</WarningsAsErrors>
+```
+
+Either make the attribute constructible from your assembly, or attach the policy to the binding
+instead — `app.BindMyServices().RequireAuthorization("admins")` for every endpoint in the container,
+or `app.BindGreeter().RequireAuthorization("admins")` for one service (a `Bind{Contract}` extension is
+generated per contract alongside the container-wide one).
 
 `BindMyServices` takes an optional routing prefix (`app.BindMyServices("connect")`), which is what
 lets Connect share a host with gRPC: the two use identical paths otherwise, and ASP.NET Core will not

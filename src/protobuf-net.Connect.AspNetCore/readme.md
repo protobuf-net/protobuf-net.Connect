@@ -18,7 +18,10 @@ all work from one implementation.
 
 Each method becomes **its own endpoint**, so `[Authorize]`, CORS policies, rate limiting and output
 caching attach per RPC — ASP.NET Core resolves those from the matched endpoint, in middleware that
-runs before any handler.
+runs before any handler. On the code-first path those attributes are carried from your implementation
+without reflecting: they are reconstructed at build time and emitted into the binding. (Contract-first
+is the exception — there is no generator in that path, so the attributes are passed explicitly; see
+the docs.)
 
 **Only full-duplex bidirectional streaming needs HTTP/2.** Everything else — including *half*-duplex
 bidi — works over plaintext HTTP/1.1, because Connect carries trailing metadata in the body rather

@@ -1,6 +1,9 @@
 using System.Net;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -159,6 +162,44 @@ try
         Require(viaConnect.Transport == "application/proto",
             $"Connect surfaces it, saw \"{viaConnect.Transport}\"");
         return $"gRPC: hidden; Connect: {viaConnect.Transport}";
+    });
+
+    await Check("[Authorize] reaches the endpoint on BOTH transports", () =>
+    {
+        // The sharp one, and the reason this project is where it lives: the two transports get there
+        // by opposite routes. Grpc.AspNetCore.Server REFLECTS over the implementation at startup;
+        // ProtoConnectGenerator reconstructs the same list at BUILD time and emits constructor calls,
+        // because MapConnectService deliberately does not reflect - that is what makes it AOT-safe.
+        //
+        // So this is not "does the attribute work", it is "do the two routes agree". A dropped
+        // [Authorize] has no symptom: the build succeeds, the service answers, and the only difference
+        // is that anybody may call it. Comparing against the reflective answer is the only check that
+        // can notice, and it is the same shape as protobuf-net's AotGrpcMetadataDiff oracle.
+        var endpoints = ((IEndpointRouteBuilder)app).DataSources
+            .SelectMany(static source => source.Endpoints).ToList();
+
+        var viaGrpc = Authorize(endpoints, "/dualhost.v1.Greeter/Admin");
+        var viaConnect = Authorize(endpoints, "/connect/dualhost.v1.Greeter/Admin");
+
+        Require(viaGrpc is not null, "the gRPC endpoint carries it (reflected at startup)");
+        Require(viaConnect is not null, "the Connect endpoint carries it (reconstructed at build time)");
+        Require(viaConnect!.Policy == viaGrpc!.Policy,
+            $"the same policy, gRPC \"{viaGrpc.Policy}\" vs Connect \"{viaConnect.Policy}\"");
+
+        // ...and the un-attributed sibling carries none, so a version of this that simply put an
+        // [Authorize] on every endpoint would fail rather than pass
+        Require(Authorize(endpoints, "/connect/dualhost.v1.Greeter/SayHello") is null,
+            "SayHello carries none");
+
+        return Task.FromResult($"both endpoints, policy \"{viaConnect.Policy}\"");
+
+        static AuthorizeAttribute? Authorize(List<Endpoint> endpoints, string route)
+        {
+            var match = endpoints.OfType<RouteEndpoint>()
+                .FirstOrDefault(e => string.Equals(e.RoutePattern.RawText, route, StringComparison.Ordinal))
+                ?? throw new InvalidOperationException($"no endpoint is mapped at {route}");
+            return match.Metadata.GetMetadata<AuthorizeAttribute>();
+        }
     });
 
     await Check("one implementation instance type serves both", () =>
