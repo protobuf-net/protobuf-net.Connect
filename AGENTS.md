@@ -7,6 +7,19 @@ Only non-obvious things live here; the code is the reference for everything else
 This project does not exclude LLM etc tool usage under human guidance. All responsibility for
 code-quality rests with the human submitter/reviewer; "slop" will be culled without mercy.
 
+## `docs/` is published; `notes/` is not
+
+`docs/` is the Jekyll source for the documentation site, with `jekyll-sitemap` on and no `exclude:`
+in `_config.yml` - so **a file put there is built into the site and handed to search engines, however
+internal it reads**. That is not hypothetical: four working-notes files were live on the protobuf-net
+site for a while before anyone noticed.
+
+Working notes, handovers and measurements go in **`notes/`**, which is not published. `findings.md`
+is the running log; it is numbered, and new entries append.
+
+Keep the two straight when adding anything: if it would embarrass you on a search results page, it
+belongs in `notes/`.
+
 ## Layout
 
 - **`src/` is the published surface and nothing else is.** A project's folder decides whether it

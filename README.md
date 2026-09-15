@@ -53,6 +53,9 @@ they are fair *between the rows*, which is the comparison being made.
 At the codec layer, against the same message: binary writes in 338 ns with **zero allocation**, JSON
 in 484 ns / 264 B. See `notes/findings.md` §56–§57 for the full measurements and their traps.
 
+**Documentation: [connect.protobuf-net.dev](https://connect.protobuf-net.dev)** — getting started,
+contract-first, JSON, and the full performance numbers with their caveats.
+
 ## Two ways in
 
 ### 1. Code-first — your existing protobuf-net.Grpc contracts
