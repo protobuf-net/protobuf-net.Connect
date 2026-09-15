@@ -123,12 +123,15 @@ var client = new Greeter.GreeterClient(new ConnectCallInvoker(httpClient, new Ur
 deadlines all behave as they do under gRPC. Nothing is re-encoded: for `application/proto` a Connect
 body and a gRPC body are the same bytes.
 
-> ⚠️ **`[Authorize]` is not inferred on this path.** `Grpc.AspNetCore.Server` collects endpoint
-> metadata by reflecting over your implementation; this deliberately does not reflect, so an
-> authorization attribute would be silently dropped. Chain `.RequireAuthorization(...)`, or pass the
-> `metadata` argument. The analyzer **PBN5007** warns when your implementation carries an
+> ⚠️ **`[Authorize]` is not inferred on this path** — and only on this one. `Grpc.AspNetCore.Server`
+> collects endpoint metadata by reflecting over your implementation; this deliberately does not
+> reflect, so an authorization attribute would be silently dropped. Chain `.RequireAuthorization(...)`,
+> or pass the `metadata` argument. The analyzer **PBN5007** warns when your implementation carries an
 > authorization attribute and the call supplies neither — the one rule here worth escalating with
 > `<WarningsAsErrors>PBN5007</WarningsAsErrors>`.
+>
+> The **code-first** path does carry them: there is a generator in it, so the attributes are
+> reconstructed at build time and emitted into the binding. Nothing reflects either way.
 
 ## JSON
 

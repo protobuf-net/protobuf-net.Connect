@@ -66,7 +66,8 @@ out alongside.
 **A package packed in that mode pins its protobuf-net dependency to the local build's version** and
 must never be published; the build warns, and `release.yml` refuses outright.
 
-CI no longer checks protobuf-net out - it restores 3.4.28 like any other consumer, which is the first
+CI no longer checks protobuf-net out - it restores the pinned protobuf-net like any other consumer
+(3.4.29 at the time of writing; `Directory.Packages.props` is the authority), which is the first
 thing that actually exercises the package boundary the split introduced. If a generator change is
 needed here, it has to ship in a protobuf-net release first; that is the cost, and it is the reason
 the generator **probes** for types rather than naming them.

@@ -133,9 +133,9 @@ Your own attributes are carried as well as the framework's, so `endpoint.Metadat
 finds them.
 
 > **Version note.** This comes from protobuf-net's build-time tooling rather than from this package,
-> so it needs a protobuf-net **newer than 3.4.28** — the release that first carried the Connect
-> generator. On 3.4.28 itself the attributes are not carried at all; until you upgrade, put the policy
-> on the binding with `.RequireAuthorization(...)` as below.
+> so it needs **protobuf-net 3.4.29 or later**. On 3.4.28 — the release that first carried the Connect
+> generator — the attributes are not carried at all; until you upgrade, put the policy on the binding
+> with `.RequireAuthorization(...)` as below.
 
 ### When an attribute cannot be reconstructed
 
