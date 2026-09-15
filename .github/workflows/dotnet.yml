@@ -123,7 +123,11 @@ jobs:
       run: |
         dotnet build Build.csproj -c Release -p:Packing=true -p:GeneratePackageOnBuild=false
         dotnet pack Build.csproj --no-build -c Release -p:Packing=true -p:PackageOutputPath=${{ github.workspace }}/.nupkgs
-    - name: Upload packages
+    # Attaches the .nupkg files to the run so a packaging problem can be inspected from the Actions
+    # page. Nothing here publishes: CI has no `nuget push` step and, more to the point, no
+    # `id-token: write` - so the OIDC exchange with nuget.org is not available to it at all. Only
+    # release.yml can publish, and only on a published GitHub Release.
+    - name: Attach packages to this run (artifact, not a feed)
       uses: actions/upload-artifact@v4
       with:
         name: nupkgs
