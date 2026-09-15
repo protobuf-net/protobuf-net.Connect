@@ -1,0 +1,123 @@
+# Publishes to nuget.org when a GitHub Release is published.
+#
+# Auth is NuGet Trusted Publishing (OIDC): no long-lived API key is stored anywhere.
+# The one-time setup on nuget.org is: username menu -> Trusted Publishing -> add policy with
+#   Repository Owner: protobuf-net / Repository: protobuf-net.Connect / Workflow File: release.yml
+#   Environment: release
+# plus a NUGET_USER repository secret holding the nuget.org profile name to publish as, and a
+# `release` environment on this repository. The policy is per-repository - protobuf-net's does not
+# cover this one.
+#
+# Versioning note: Nerdbank.GitVersioning computes the version from version.json plus commit height -
+# the tag name does not set it. Create release tags with `nbgv tag` (or tag the commit whose computed
+# version matches); the guard below fails the run on any mismatch rather than publishing a package
+# that disagrees with its release. Note the tag carries the prerelease suffix: 0.1.1-alpha, not 0.1.1.
+#
+# Actions are pinned by commit SHA rather than by tag. A tag is mutable: whoever controls the action
+# repository can repoint v4 at different code, and this workflow holds id-token: write and publishes
+# to nuget.org, so that is where it genuinely matters.
+name: Release
+
+on:
+  release:
+    types: [published]
+  # dry run: everything except the tag check and the push, so the pipeline can be proven (and the
+  # packages inspected, via the run artifact) without cutting a release
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write # for the OIDC exchange with nuget.org
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0  # full history, for versioning
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
+    # ------------------------------------------------------------------------------------------
+    # A release must NOT be built against a protobuf-net checkout. In that mode the packed
+    # dependency is pinned to whatever version the local build produced - "3.4.96-gf7ef366c5b"
+    # rather than a release - which would be a broken package on nuget.org. CI packs that way
+    # deliberately, as validation; this must not.
+    #
+    # Which means this workflow cannot succeed until a protobuf-net.Core carrying
+    # ProtoConnectGenerator is published. That is the intended ordering, and failing here says so
+    # out loud rather than shipping something subtly wrong.
+    # ------------------------------------------------------------------------------------------
+    - name: Refuse to release against a source checkout
+      run: |
+        if [ -n "${ProtoBufSourcePath:-}" ]; then
+          echo "::error::ProtoBufSourcePath is set; a release must resolve protobuf-net from a package."
+          exit 1
+        fi
+        echo "Resolving protobuf-net from packages, as a release must."
+
+    - name: Verify tag matches computed version
+      if: github.event_name == 'release'
+      run: |
+        set -euo pipefail
+        dotnet tool restore
+        computed=$(dotnet tool run nbgv -- get-version --variable NuGetPackageVersion | tr -d '[:space:]')
+        tag="${{ github.event.release.tag_name }}"
+        tag="${tag#v}"
+        if [ "$computed" != "$tag" ]; then
+          echo "::error::Tag '$tag' does not match the computed version '$computed'; tag with 'nbgv tag' so the two agree."
+          exit 1
+        fi
+        echo "Publishing $computed"
+
+    - name: Restore dependencies
+      run: dotnet restore Build.csproj
+    - name: Build
+      run: dotnet build Build.csproj --no-restore -c Release
+    - name: Test
+      run: dotnet test Build.csproj --no-build -c Release --verbosity normal
+
+    # The same external oracles CI gates on: a protocol or mapping bug that compiles cleanly must not
+    # ship. Both compare against something that is not ours - the conformance suite's reference
+    # implementation, and Google's own JSON formatter.
+    - name: Code-first JSON differential
+      run: dotnet run --project tests/ConnectJsonDifferential/ConnectJsonDifferential.csproj -c Release --no-build
+    - name: Run the Connect conformance suite
+      run: |
+        set -euo pipefail
+        VERSION=1.0.5
+        SHA=7d4d1f36980debf900b12514c8d51107245e9195b3c581e61fa165fd95c94284
+        curl -sSL --retry 3 -o conformance.tar.gz \
+          "https://github.com/connectrpc/conformance/releases/download/v$VERSION/connectconformance-v$VERSION-Linux-x86_64.tar.gz"
+        echo "$SHA  conformance.tar.gz" | sha256sum -c -
+        tar xzf conformance.tar.gz connectconformance
+        dotnet publish tests/ConnectConformance/ConnectConformance.csproj -c Release -o artifacts/conformance
+        CONF=tests/ConnectConformance/conformance-config.yaml
+        ./connectconformance --mode server --conf $CONF -- ./artifacts/conformance/ConnectConformance
+        ./connectconformance --mode client --conf $CONF -- ./artifacts/conformance/ConnectConformance --client
+
+    # Packing=true restricts the traversal to the shipping projects (see Build.csproj)
+    - name: Pack
+      run: dotnet pack Build.csproj --no-build -c Release -p:Packing=true -p:PackageOutputPath=${{ github.workspace }}/.nupkgs
+    # The packages survive as a run artifact even if the push fails
+    - name: Upload packages
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: packages
+        path: .nupkgs/*.nupkg
+
+    - name: NuGet login (OIDC to temp API key)
+      if: github.event_name == 'release'
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+    - name: Push to nuget.org
+      if: github.event_name == 'release'
+      run: dotnet nuget push .nupkgs/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
