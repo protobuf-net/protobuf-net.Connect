@@ -1,6 +1,8 @@
 # protobuf-net.Connect.AspNetCore
 
-**Experimental.** Serves the [Connect protocol](https://connectrpc.com) from ASP.NET Core.
+**Experimental.** Serves the [Connect protocol](https://connectrpc.com) from ASP.NET Core — the
+cross-language protocol with implementations for Go, TypeScript, Swift and others, so these endpoints
+are callable from any of them.
 
 **Documentation: [connect.protobuf-net.dev](https://connect.protobuf-net.dev)**
 

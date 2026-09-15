@@ -3,9 +3,15 @@ protobuf-net.Connect
 
 # What is protobuf-net.Connect?
 
-It is the [Connect protocol](https://connectrpc.com) for .NET — gRPC's wire semantics over ordinary
-HTTP — built for native AOT from the start. No ref-emit, no runtime marshaller lookup, and no
-reflection on any serving or calling path.
+[Connect](https://connectrpc.com) is a **cross-language RPC protocol** — gRPC's wire semantics over
+ordinary HTTP — with implementations for Go, TypeScript, Swift, Kotlin and others. **This is an
+implementation of it for .NET**, built for native AOT from the start: no ref-emit, no runtime
+marshaller lookup, and no reflection on any serving or calling path.
+
+Nothing here is .NET-specific on the wire. A service served from here is callable from `connect-go`,
+from `connect-es` in a browser, or from `curl`; a client from here calls any conforming Connect
+server, whatever language it is written in. The [conformance](#conformance) numbers below are the
+evidence for that, in both directions.
 
 The difference that matters operationally: **Connect puts trailing metadata in the body** rather than
 in HTTP trailers, and HTTP trailers are the only reason gRPC insists on HTTP/2. So unary,
@@ -78,10 +84,13 @@ HTTP/1.1 and HTTP/2, both codecs, all compressions, and Connect GET:
 | client | **1700 / 1700** |
 
 Server mode drives a real Connect client against our server; client mode drives our client against the
-suite's reference server. Between them there is no step where both ends are ours.
+suite's reference server. Both of those reference ends are the Go implementation, so between them
+there is no step where both ends are ours, and none where both ends are .NET.
 
 ## Related
 
+- [connectrpc.com](https://connectrpc.com) — the protocol itself, its specification, and the
+  implementations for other languages
 - [protobuf-net](https://docs.protobuf-net.dev) — the serializer, and the build-time tooling this
   depends on
 - [protobuf-net.Grpc](https://protobuf-net.github.io/protobuf-net.Grpc/) — the code-first gRPC stack

@@ -1,7 +1,10 @@
 # protobuf-net.Connect
 
-**Experimental.** The [Connect protocol](https://connectrpc.com) for .NET, built for AOT from the
-start — no ref-emit, no runtime marshaller lookup, no reflection on any serving or calling path.
+**Experimental.** A **.NET implementation** of the [Connect protocol](https://connectrpc.com) — the
+cross-language protocol with implementations for Go, TypeScript, Swift and others — built for AOT
+from the start: no ref-emit, no runtime marshaller lookup, no reflection on any serving or calling
+path. Nothing here is .NET-specific on the wire; these services and clients interoperate with every
+other Connect implementation.
 
 ### 📖 Documentation: **[connect.protobuf-net.dev](https://connect.protobuf-net.dev)**
 

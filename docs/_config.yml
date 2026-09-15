@@ -4,7 +4,7 @@
 # NOTE: `url` and CNAME are a guess - change both together if the site lands somewhere else.
 
 title: protobuf-net.Connect
-description: The Connect protocol for .NET - AOT-first, gRPC semantics over ordinary HTTP
+description: A .NET implementation of the Connect protocol - AOT-first, gRPC semantics over ordinary HTTP
 url: https://connect.protobuf-net.dev
 
 theme: jekyll-theme-cayman
