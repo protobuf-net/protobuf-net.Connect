@@ -49,11 +49,11 @@ authorization being silently dropped from a contract-first service, protects nob
 visible in the generated nuspec (`include="All"` versus `exclude="Build,Analyzers"`), which is where
 it was caught.
 
-### Building against unreleased tooling
+### Building against a protobuf-net checkout
 
-Shipped protobuf-net.Core 3.4.0 carries `ProtoModelGenerator` and `GrpcProxyGenerator` but **not**
-`ProtoConnectGenerator`, and its `ProtoModelGenerator` predates the JSON half. Until a Core with both
-is published, this repository has to build against a protobuf-net checkout:
+`protobuf-net.Core` 3.4.28 was the first release carrying `ProtoConnectGenerator` and
+`ProtoModelGenerator`'s JSON half, so an ordinary restore is enough now. To develop a generator
+change alongside this runtime, build against a checkout instead:
 
 ```bash
 dotnet build Build.csproj -p:ProtoBufSourcePath=../protobuf-net
@@ -64,9 +64,12 @@ dotnet build Build.csproj -p:ProtoBufSourcePath=../protobuf-net
 out alongside.
 
 **A package packed in that mode pins its protobuf-net dependency to the local build's version** and
-must never be published; the build warns. Once Core ships the Connect generator: delete the checkout
-step from the workflow, drop `PROTOBUF_NET_SOURCE`, and bump the versions in
-`Directory.Packages.props`.
+must never be published; the build warns, and `release.yml` refuses outright.
+
+CI no longer checks protobuf-net out - it restores 3.4.28 like any other consumer, which is the first
+thing that actually exercises the package boundary the split introduced. If a generator change is
+needed here, it has to ship in a protobuf-net release first; that is the cost, and it is the reason
+the generator **probes** for types rather than naming them.
 
 ## What the checks are for
 

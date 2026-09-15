@@ -38,35 +38,6 @@ jobs:
     - name: Install the native toolchain
       run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
 
-    # ------------------------------------------------------------------------------------------
-    # BOOTSTRAP, and it is temporary. protobuf-net.Core ships the build-time tooling as analyzer
-    # assets (analyzers/dotnet/cs/protobuf-net.BuildTools.dll, since 3.4.0), so normally a package
-    # reference is all this repository needs. But the SHIPPED 3.4.0 tooling has ProtoModelGenerator
-    # and GrpcProxyGenerator only - ProtoConnectGenerator, and ProtoModelGenerator's JSON half, are
-    # not in a release yet. Verified by inspecting the package, not assumed.
-    #
-    # So the tooling is built from source here. Once a protobuf-net.Core containing
-    # ProtoConnectGenerator is published: delete this step, drop PROTOBUF_NET_SOURCE below, and bump
-    # the protobuf-net versions in src/Directory.Packages.props. Nothing else changes.
-    # ------------------------------------------------------------------------------------------
-    - name: Check out protobuf-net (for unreleased build-time tooling)
-      uses: actions/checkout@v5
-      with:
-        repository: protobuf-net/protobuf-net
-        ref: ${{ vars.PROTOBUF_NET_REF || 'marc/connect' }}
-        path: .protobuf-net
-        fetch-depth: 0
-    - name: Use protobuf-net from source
-      run: echo "PROTOBUF_NET_SOURCE=-p:ProtoBufSourcePath=${{ github.workspace }}/.protobuf-net" >> $GITHUB_ENV
-
-    # Prints the version this commit computes - i.e. the tag to type into the GitHub Release UI.
-    # nbgv derives it from version.json plus commit height, so it is a property of the COMMIT rather
-    # than of the release, and release.yml refuses a tag that disagrees with it. Written to the job
-    # summary as well as the log, so it is on the run page rather than buried.
-    #
-    # NuGetPackageVersion, not SimpleVersion: they coincide for a stable version released from main,
-    # and diverge the moment a prerelease is involved (0.1.1-alpha versus 0.1.1). The guard compares
-    # NuGetPackageVersion, so that is what has to be reported.
     - name: Report the computed version
       shell: bash
       run: |
@@ -88,14 +59,14 @@ jobs:
           echo "Releases → Draft a new release → tag \`$version\` → publish."
         } >> "$GITHUB_STEP_SUMMARY"
     - name: Restore dependencies
-      run: dotnet restore Build.csproj $PROTOBUF_NET_SOURCE
+      run: dotnet restore Build.csproj
     - name: Build
-      run: dotnet build Build.csproj --no-restore $PROTOBUF_NET_SOURCE
+      run: dotnet build Build.csproj --no-restore
     # No `dotnet test` step, deliberately: nothing here is a unit-test project, so it finds nothing
     # and exits 1. The checks below ARE the test suite - executables that return an exit code, run
     # against external oracles rather than against our own opinion. See AGENTS.md.
     - name: Contract-first checks
-      run: dotnet run --project tests/ConnectContractFirst/ConnectContractFirst.csproj --no-build $PROTOBUF_NET_SOURCE
+      run: dotnet run --project tests/ConnectContractFirst/ConnectContractFirst.csproj --no-build
 
     # The code-first JSON mapping, against Google's own JsonFormatter over protoc's C# for the same
     # schema. An EXTERNAL oracle, which is the whole point: a JSON writer and reader of ours would
@@ -103,24 +74,24 @@ jobs:
     # else. The .proto is re-derived from the contracts on every run, so it cannot quietly stop
     # describing the types it is supposed to describe.
     - name: Code-first JSON differential
-      run: dotnet run --project src/ConnectJsonDifferential/ConnectJsonDifferential.csproj $PROTOBUF_NET_SOURCE
+      run: dotnet run --project src/ConnectJsonDifferential/ConnectJsonDifferential.csproj
 
     # self-contained: hosts Kestrel on an ephemeral loopback port and calls itself, so it needs
     # nothing from the network. src/ConnectProbe is deliberately NOT here - it checks interoperability
     # against demo.connectrpc.com, and a third party's uptime has no business gating our builds.
     - name: Publish and run the Connect smoke test
       run: |
-        dotnet publish $PROTOBUF_NET_SOURCE src/AotConnectSmoke/AotConnectSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-connect-smoke
+        dotnet publish src/AotConnectSmoke/AotConnectSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-connect-smoke
         ./artifacts/aot-connect-smoke/AotConnectSmoke
     - name: Publish and run the code-first JSON AOT smoke test
       run: |
-        dotnet publish $PROTOBUF_NET_SOURCE src/AotConnectJsonSmoke/AotConnectJsonSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-json-smoke
+        dotnet publish src/AotConnectJsonSmoke/AotConnectJsonSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-json-smoke
         ./artifacts/aot-json-smoke/AotConnectJsonSmoke
     # One contract, one implementation, one host, served over gRPC and Connect at the same time and
     # called both ways - the claim the whole library rests on, and the only check that exercises it.
     - name: Publish and run the dual-transport smoke test
       run: |
-        dotnet publish $PROTOBUF_NET_SOURCE src/AotDualHostSmoke/AotDualHostSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-dual-host
+        dotnet publish src/AotDualHostSmoke/AotDualHostSmoke.csproj -c Release -r linux-x64 -o artifacts/aot-dual-host
         ./artifacts/aot-dual-host/AotDualHostSmoke
 
     # The only EXTERNAL oracle for the protocol itself: connectrpc/conformance drives a real Connect
@@ -139,7 +110,7 @@ jobs:
           "https://github.com/connectrpc/conformance/releases/download/v$VERSION/connectconformance-v$VERSION-Linux-x86_64.tar.gz"
         echo "$SHA  conformance.tar.gz" | sha256sum -c -
         tar xzf conformance.tar.gz connectconformance
-        dotnet publish $PROTOBUF_NET_SOURCE src/ConnectConformance/ConnectConformance.csproj -c Release -o artifacts/conformance
+        dotnet publish src/ConnectConformance/ConnectConformance.csproj -c Release -o artifacts/conformance
         CONF=src/ConnectConformance/conformance-config.yaml
         ./connectconformance --mode server --conf $CONF -- ./artifacts/conformance/ConnectConformance
         ./connectconformance --mode client --conf $CONF -- ./artifacts/conformance/ConnectConformance --client
@@ -150,8 +121,8 @@ jobs:
     # second full one.
     - name: Pack
       run: |
-        dotnet build Build.csproj -c Release -p:Packing=true -p:GeneratePackageOnBuild=false $PROTOBUF_NET_SOURCE
-        dotnet pack Build.csproj --no-build -c Release -p:Packing=true $PROTOBUF_NET_SOURCE -p:PackageOutputPath=${{ github.workspace }}/.nupkgs
+        dotnet build Build.csproj -c Release -p:Packing=true -p:GeneratePackageOnBuild=false
+        dotnet pack Build.csproj --no-build -c Release -p:Packing=true -p:PackageOutputPath=${{ github.workspace }}/.nupkgs
     - name: Upload packages
       uses: actions/upload-artifact@v4
       with:

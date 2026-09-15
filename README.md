@@ -201,22 +201,19 @@ dotnet test Build.csproj
 
 The build-time generators live in **protobuf-net.BuildTools**, which stays in the
 [protobuf-net](https://github.com/protobuf-net/protobuf-net) repository and is not a package of its
-own — it ships inside `protobuf-net.Core` as analyzer assets, so an ordinary package reference brings
-it along.
+own — it ships inside `protobuf-net.Core` as analyzer assets, so the ordinary package reference brings
+it along. Nothing else is needed.
 
-To develop against an unreleased protobuf-net — which you will need while the Connect generator is
-still unshipped — point the build at a local checkout:
+To develop a generator change alongside this runtime, point the build at a protobuf-net checkout:
 
 ```bash
 dotnet build Build.csproj -p:ProtoBufSourcePath=../protobuf-net
 ```
 
 That swaps every protobuf-net package reference for a project reference, including the tooling. See
-`Directory.Build.targets`.
-
-Note that a package **packed in that mode pins its protobuf-net dependency to the local build's
-version**, so it is validation only — the build warns if you try. A release must be packed with
-`ProtoBufSourcePath` unset, which needs a published protobuf-net.Core carrying `ProtoConnectGenerator`.
+`Directory.Build.targets`. A package **packed in that mode pins its protobuf-net dependency to the
+local build's version**, so it is for development only — the build warns, and `release.yml` refuses
+outright.
 
 ## Licence
 
