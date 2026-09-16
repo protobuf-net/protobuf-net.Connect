@@ -43,6 +43,7 @@ dotnet add package protobuf-net.Connect.Google       # JSON for contract-first m
   unchanged
 - [Contract-first](contract-first) — your existing `.proto` and `protoc`-generated service, unchanged
 - [JSON](json) — the canonical protobuf JSON mapping, on both paths
+- [CORS](cors) — calling from a browser, and the two things that fail silently
 - [Performance](performance) — measured against gRPC on the same stack
 
 ## Two ways in, in one screen

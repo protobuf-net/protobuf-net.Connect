@@ -3206,8 +3206,11 @@ Everything below is assumption or inference, not measurement:
 - Blazor WASM's handler and streaming. (Duplex over `SocketsHttpHandler` **is** answered — §24 proves
   it interleaves — but the browser handler is a different implementation.)
 - protobuf-net map member determinism, which GET-as-cache-key depends on.
-- The exact CORS header set browsers need for Connect (`connect-protocol-version`, `connect-timeout-ms`
-  and friends must be allowed, and exposed on responses). Only matters once JSON exists.
+- ~~The exact CORS header set browsers need for Connect (`connect-protocol-version`, `connect-timeout-ms`
+  and friends must be allowed, and exposed on responses). Only matters once JSON exists.~~
+  **Settled in §58**: the list is `connectrpc/cors`'s, `ConnectCors.WithConnect()` applies it, and
+  `tests/ConnectCors` pins it against a real host. Two things it cannot cover - application headers and
+  `trailer-` prefixed trailing metadata - are documented, because both fail silently.
 - ~~Whether protobuf-net's schema output is faithful enough that a `.proto` emitted from a code-first
   model round-trips through another language's codegen to the same field numbers *and names*.~~
   **Settled in §48**: the names agree automatically, because both ends derive the JSON name
@@ -3465,3 +3468,55 @@ layer is a small fraction of the cost. It would measure the runtimes, not the li
 
 The one version of that which *would* be worth doing is a robustness experiment rather than a
 performance one: sustained load from a genuinely foreign client, checking our server stays correct.
+
+## 58. CORS, answered - plus two gaps found by writing a consumer from the docs
+
+The header list is not ours to invent: `connectrpc/cors` is the reference every implementation's docs
+point at, and matching it exactly means a policy copied from any Connect guide works here. It is now
+`ConnectCors` in protobuf-net.Connect.AspNetCore, with `tests/ConnectCors` pinning it against a real
+host - preflight, actual call, and negative twins, because a CORS test that only asserts "allowed"
+passes just as happily against a policy that allows everything.
+
+### The server cannot tell you the policy is wrong
+
+ASP.NET Core answers a preflight `204` **with** `Access-Control-Allow-Origin` whether or not it allows
+the requested headers; it simply omits the ones it will not allow. Nothing errors, logs or 4xxs - the
+*browser* refuses the real request afterwards. The first version of the negative check asserted the
+absence of `Access-Control-Allow-Origin` and failed for exactly this reason, which is how it was found.
+
+So the assertion that means something is "`Access-Control-Allow-Headers` does not contain it", and the
+diagnosis recipe for a consumer is to read that header off the preflight rather than to look at logs.
+
+### Trailing metadata is the trap
+
+Unary trailing metadata goes out as `trailer-` prefixed response headers - that is how Connect avoids
+HTTP trailers and so avoids requiring HTTP/2. CORS has no prefix wildcard, so each has to be exposed by
+name. Miss it and the call succeeds, the server really does send the header, and the client sees
+nothing.
+
+### Two gaps, both found because this was the first consumer written *from the docs*
+
+Neither is a CORS problem; both surfaced because `tests/ConnectCors` is a fresh code-first project that
+follows `docs/getting-started.md` step for step, which nothing else here does.
+
+1. **`[ProtoConnect]` does not seed the `[ProtoModel]`.** `GrpcProxyGenerator.CollectPayloadsForModel`
+   walks `[ProtoGrpc]` declarations and contributes their payload types to the named model; there is no
+   Connect equivalent. So a Connect-only code-first project gets an *empty* model - and an empty model
+   emits nothing at all, `Instance` included, so the failure is `CS0117: 'MyModel' does not contain a
+   definition for 'Instance'` pointing into generated code, with no diagnostic saying why.
+
+   The documented getting-started example is exactly this shape, and its comment says "everything
+   reachable from the services below is pulled in automatically", which is true only when `[ProtoGrpc]`
+   is also present. `tests/AotConnectSmoke` never caught it because it lists `[ProtoSerializable]` seeds
+   explicitly; `tests/AotDualHostSmoke` never caught it because it declares `[ProtoGrpc]` too.
+
+2. **Connect GET is unreachable from code-first.** `ProtoConnectGenerator` always emits
+   `new ConnectMethod(..., ServiceName, "Name")`, leaving `idempotent` at its `false` default - there is
+   no attribute or convention for declaring a method side-effect-free. So no code-first method is bound
+   for GET on the server, and `ConnectChannel`'s `useGet` has nothing to act on. Connect GET is
+   "the one thing Connect does which gRPC structurally cannot" in our own docs, and it currently works
+   on the contract-first path only, via `GoogleIdempotency.For(...)`.
+
+Both fixes are in **protobuf-net**, not here, so both need a release of that before a consumer sees
+them. Recorded rather than fixed in passing: the first changes seeding behaviour and the second is API
+design (an attribute, and where it lives).

@@ -73,6 +73,9 @@ jobs:
     # round-trip perfectly against each other while spelling every key differently from everyone
     # else. The .proto is re-derived from the contracts on every run, so it cannot quietly stop
     # describing the types it is supposed to describe.
+    - name: Browser CORS preflight checks
+      run: dotnet run --project tests/ConnectCors/ConnectCors.csproj --no-build
+
     - name: Code-first JSON differential
       run: dotnet run --project tests/ConnectJsonDifferential/ConnectJsonDifferential.csproj
 
