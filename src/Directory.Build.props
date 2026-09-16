@@ -31,12 +31,16 @@
              thing that finds it, and must not claim it twice -->
         <DefaultItemExcludes>$(DefaultItemExcludes);readme.md</DefaultItemExcludes>
 
-        <!-- The second half of API tracking, and it deliberately lags the first. PublicAPI.Shipped.txt
-             (enforced at build time, per project) catches an accidental *addition* in review; package
-             validation catches a removal or narrowing against a *published* baseline - which means it
-             wants a GA version to point at. Uncomment with 1.0.0 once that is on nuget.org; pointing it
-             at 0.1.8-alpha would baseline exactly the surface 1.0 supersedes. -->
-        <!-- <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion> -->
+        <!-- The second half of API tracking, and the two catch opposite mistakes: PublicAPI.Shipped.txt
+             (per project, at build time) catches an accidental *addition* in review, while this catches
+             a removal or narrowing - at pack time, against the previously *published* package, which it
+             downloads. That is why it could not be turned on before 1.0.0 existed: pointing it at
+             0.1.8-alpha would have baselined exactly the surface 1.0 supersedes.
+
+             Bump this to the newest released version after each release, so each release is checked
+             against the one before it rather than against 1.0.0 forever. -->
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
     </PropertyGroup>
 
     <ItemGroup>
