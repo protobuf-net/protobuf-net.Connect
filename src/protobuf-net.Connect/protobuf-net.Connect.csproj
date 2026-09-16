@@ -7,11 +7,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ProtoBuf.Connect</RootNamespace>
     <AssemblyName>protobuf-net.Connect</AssemblyName>
-    <Nullable>enable</Nullable>
-    <Description>Connect protocol (connectrpc.com) client for protobuf-net - experimental</Description>
-    <!-- experimental, but it SHIPS: that is the point of the split. There is no ApiCompat
-         baseline yet because nothing has been published; add ProtoBufConnectPackageBaseline in
-         src/Directory.Build.props once there is a released version to diff against. -->
+    <Description>Connect protocol (connectrpc.com) client for protobuf-net</Description>
+    <!-- The public API is declared in PublicAPI/PublicAPI.Shipped.txt and enforced at build time.
+         Package validation is the other half and needs a GA baseline to diff against, so it is turned
+         on in src/Directory.Build.props once 1.0.0 is published - not before. -->
     <IsPackable>true</IsPackable>
     <IsTrimmable>true</IsTrimmable>
     <UseProtoBufCore>true</UseProtoBufCore>
@@ -38,6 +37,11 @@
          Build,Analyzers - so without this, a consumer referencing only protobuf-net.Connect gets no
          analyzers, and PBN5007 (authorization silently dropped on a contract-first service) protects
          nobody. Verified by packing and reading the nuspec, not by reasoning. -->
+  </ItemGroup>
+
+  <ItemGroup Label="public API tracking">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI/PublicAPI.*.txt" />
   </ItemGroup>
 
 </Project>

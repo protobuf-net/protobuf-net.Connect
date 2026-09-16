@@ -1,0 +1,37 @@
+#nullable enable
+ProtoBuf.Connect.AspNetCore.ConnectClientStreamingHandler<TImplementation, TRequest, TResponse>
+ProtoBuf.Connect.AspNetCore.ConnectCors
+ProtoBuf.Connect.AspNetCore.ConnectDuplexHandler<TImplementation, TRequest, TResponse>
+ProtoBuf.Connect.AspNetCore.ConnectEndpointRouteBuilderExtensions
+ProtoBuf.Connect.AspNetCore.ConnectServerCallContext
+ProtoBuf.Connect.AspNetCore.ConnectServerCallContext.HttpContext.get -> Microsoft.AspNetCore.Http.HttpContext!
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.Codecs.get -> System.Collections.Generic.IList<ProtoBuf.Connect.ConnectCodec!>!
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.Compressions.get -> System.Collections.Generic.IList<ProtoBuf.Connect.ConnectCompression!>!
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.ConnectServerOptions() -> void
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.IncludeExceptionDetailInErrors.get -> bool
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.IncludeExceptionDetailInErrors.set -> void
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.RequireProtocolVersionHeader.get -> bool
+ProtoBuf.Connect.AspNetCore.ConnectServerOptions.RequireProtocolVersionHeader.set -> void
+ProtoBuf.Connect.AspNetCore.ConnectServerStreamingHandler<TImplementation, TRequest, TResponse>
+ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation>
+ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation>.AddClientStreamingMethod<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, ProtoBuf.Connect.AspNetCore.ConnectClientStreamingHandler<TImplementation!, TRequest, TResponse>! handler, System.Collections.Generic.IReadOnlyList<object!>? metadata = null) -> void
+ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation>.AddDuplexMethod<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, ProtoBuf.Connect.AspNetCore.ConnectDuplexHandler<TImplementation!, TRequest, TResponse>! handler, System.Collections.Generic.IReadOnlyList<object!>? metadata = null) -> void
+ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation>.AddServerStreamingMethod<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, ProtoBuf.Connect.AspNetCore.ConnectServerStreamingHandler<TImplementation!, TRequest, TResponse>! handler, System.Collections.Generic.IReadOnlyList<object!>? metadata = null) -> void
+ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation>.AddUnaryMethod<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, ProtoBuf.Connect.AspNetCore.ConnectUnaryHandler<TImplementation!, TRequest, TResponse>! handler, System.Collections.Generic.IReadOnlyList<object!>? metadata = null) -> void
+ProtoBuf.Connect.AspNetCore.ConnectServiceCollectionExtensions
+ProtoBuf.Connect.AspNetCore.ConnectUnaryHandler<TImplementation, TRequest, TResponse>
+ProtoBuf.Connect.AspNetCore.ContractFirstConnectExtensions
+ProtoBuf.Connect.AspNetCore.IConnectServiceBinder<TImplementation>
+ProtoBuf.Connect.AspNetCore.IConnectServiceBinder<TImplementation>.Bind(ProtoBuf.Connect.AspNetCore.ConnectServiceBinderContext<TImplementation!>! context) -> void
+static ProtoBuf.Connect.AspNetCore.ConnectCors.AllowedHeaders.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static ProtoBuf.Connect.AspNetCore.ConnectCors.ExposedHeaders.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static ProtoBuf.Connect.AspNetCore.ConnectCors.Methods.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static ProtoBuf.Connect.AspNetCore.ConnectCors.WithConnect(this Microsoft.AspNetCore.Cors.Infrastructure.CorsPolicyBuilder! builder) -> Microsoft.AspNetCore.Cors.Infrastructure.CorsPolicyBuilder!
+static ProtoBuf.Connect.AspNetCore.ConnectEndpointRouteBuilderExtensions.MapConnectService<TImplementation>(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, ProtoBuf.Connect.AspNetCore.IConnectServiceBinder<TImplementation!>! binder, string? routingPrefix = null) -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
+static ProtoBuf.Connect.AspNetCore.ConnectServiceCollectionExtensions.AddConnect(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<ProtoBuf.Connect.AspNetCore.ConnectServerOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static ProtoBuf.Connect.AspNetCore.ContractFirstConnectExtensions.MapConnectService<TImplementation>(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, System.Action<Grpc.Core.ServiceBinderBase!, TImplementation!>! bindService, string? routingPrefix = null, System.Func<Grpc.Core.IMethod!, System.Collections.Generic.IReadOnlyList<object!>!>? metadata = null, System.Func<Grpc.Core.IMethod!, bool>? isIdempotent = null) -> Microsoft.AspNetCore.Builder.IEndpointConventionBuilder!
+virtual ProtoBuf.Connect.AspNetCore.ConnectClientStreamingHandler<TImplementation, TRequest, TResponse>.Invoke(TImplementation service, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.AspNetCore.ConnectServerCallContext! context) -> System.Threading.Tasks.Task<TResponse>!
+virtual ProtoBuf.Connect.AspNetCore.ConnectDuplexHandler<TImplementation, TRequest, TResponse>.Invoke(TImplementation service, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.AspNetCore.ConnectServerCallContext! context) -> System.Collections.Generic.IAsyncEnumerable<TResponse>!
+virtual ProtoBuf.Connect.AspNetCore.ConnectServerStreamingHandler<TImplementation, TRequest, TResponse>.Invoke(TImplementation service, TRequest request, ProtoBuf.Connect.AspNetCore.ConnectServerCallContext! context) -> System.Collections.Generic.IAsyncEnumerable<TResponse>!
+virtual ProtoBuf.Connect.AspNetCore.ConnectUnaryHandler<TImplementation, TRequest, TResponse>.Invoke(TImplementation service, TRequest request, ProtoBuf.Connect.AspNetCore.ConnectServerCallContext! context) -> System.Threading.Tasks.Task<TResponse>!

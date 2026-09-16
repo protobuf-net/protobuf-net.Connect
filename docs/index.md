@@ -26,8 +26,8 @@ curl --http1.1 -H 'Content-Type: application/proto' \
      --data-binary @request.bin http://localhost:5000/mypackage.v1.Greeter/SayHello
 ```
 
-> **Experimental.** The protocol surface is complete and passes the full conformance suite in both
-> directions, but the packages are `0.1-alpha` and the API may move.
+The protocol surface is complete and passes the full conformance suite in both directions; the public
+API is tracked in `PublicAPI.Shipped.txt` and checked at build time, so it cannot move by accident.
 
 ## Install
 

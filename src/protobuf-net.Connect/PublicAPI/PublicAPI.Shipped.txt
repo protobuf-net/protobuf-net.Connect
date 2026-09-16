@@ -1,0 +1,180 @@
+#nullable enable
+abstract ProtoBuf.Connect.ConnectCodec.MeasureCore<T>(T value, ProtoBuf.Connect.IConnectMessageCodec<T>? over) -> long?
+abstract ProtoBuf.Connect.ConnectCodec.Name.get -> string!
+abstract ProtoBuf.Connect.ConnectCodec.ReadCore<T>(in System.Buffers.ReadOnlySequence<byte> source, ProtoBuf.Connect.IConnectMessageCodec<T>? over) -> T
+abstract ProtoBuf.Connect.ConnectCodec.WriteCore<T>(System.Buffers.IBufferWriter<byte>! destination, T value, ProtoBuf.Connect.IConnectMessageCodec<T>? over) -> void
+abstract ProtoBuf.Connect.ConnectCompression.Compress(in System.Buffers.ReadOnlySequence<byte> payload) -> byte[]!
+abstract ProtoBuf.Connect.ConnectCompression.Decompress(in System.Buffers.ReadOnlySequence<byte> payload) -> byte[]!
+abstract ProtoBuf.Connect.ConnectCompression.Name.get -> string!
+const ProtoBuf.Connect.ConnectChannel.ProtocolVersion = "1" -> string!
+const ProtoBuf.Connect.ConnectChannel.ProtocolVersionHeader = "connect-protocol-version" -> string!
+const ProtoBuf.Connect.ConnectChannel.TimeoutHeader = "connect-timeout-ms" -> string!
+const ProtoBuf.Connect.ConnectEnvelope.FlagCompressed = 1 -> byte
+const ProtoBuf.Connect.ConnectEnvelope.FlagEndOfStream = 2 -> byte
+const ProtoBuf.Connect.ConnectEnvelope.FlagReserved = 252 -> byte
+const ProtoBuf.Connect.ConnectEnvelope.HeaderLength = 5 -> int
+override ProtoBuf.Connect.ConnectCallInvoker.AsyncClientStreamingCall<TRequest, TResponse>(Grpc.Core.Method<TRequest!, TResponse!>! method, string? host, Grpc.Core.CallOptions options) -> Grpc.Core.AsyncClientStreamingCall<TRequest!, TResponse!>!
+override ProtoBuf.Connect.ConnectCallInvoker.AsyncDuplexStreamingCall<TRequest, TResponse>(Grpc.Core.Method<TRequest!, TResponse!>! method, string? host, Grpc.Core.CallOptions options) -> Grpc.Core.AsyncDuplexStreamingCall<TRequest!, TResponse!>!
+override ProtoBuf.Connect.ConnectCallInvoker.AsyncServerStreamingCall<TRequest, TResponse>(Grpc.Core.Method<TRequest!, TResponse!>! method, string? host, Grpc.Core.CallOptions options, TRequest! request) -> Grpc.Core.AsyncServerStreamingCall<TResponse!>!
+override ProtoBuf.Connect.ConnectCallInvoker.AsyncUnaryCall<TRequest, TResponse>(Grpc.Core.Method<TRequest!, TResponse!>! method, string? host, Grpc.Core.CallOptions options, TRequest! request) -> Grpc.Core.AsyncUnaryCall<TResponse!>!
+override ProtoBuf.Connect.ConnectCallInvoker.BlockingUnaryCall<TRequest, TResponse>(Grpc.Core.Method<TRequest!, TResponse!>! method, string? host, Grpc.Core.CallOptions options, TRequest! request) -> TResponse!
+~override ProtoBuf.Connect.ConnectErrorDetail.Equals(object obj) -> bool
+override ProtoBuf.Connect.ConnectErrorDetail.GetHashCode() -> int
+~override ProtoBuf.Connect.ConnectErrorDetail.ToString() -> string
+override ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.ToString() -> string!
+override ProtoBuf.Connect.JsonConnectCodec.Name.get -> string!
+override ProtoBuf.Connect.MarshallerConnectCodec.Name.get -> string!
+override ProtoBuf.Connect.ProtoConnectCodec.Name.get -> string!
+ProtoBuf.Connect.ConnectCallInvoker
+ProtoBuf.Connect.ConnectCallInvoker.ConnectCallInvoker(ProtoBuf.Connect.ConnectChannel! channel, System.Func<Grpc.Core.IMethod!, bool>? isIdempotent = null) -> void
+ProtoBuf.Connect.ConnectCallInvoker.ConnectCallInvoker(System.Net.Http.HttpClient! http, System.Uri? baseAddress = null, System.Func<Grpc.Core.IMethod!, bool>? isIdempotent = null) -> void
+ProtoBuf.Connect.ConnectCallOptions
+ProtoBuf.Connect.ConnectCallOptions.Compression.get -> ProtoBuf.Connect.ConnectCompression?
+ProtoBuf.Connect.ConnectCallOptions.Compression.init -> void
+ProtoBuf.Connect.ConnectCallOptions.ConnectCallOptions() -> void
+ProtoBuf.Connect.ConnectCallOptions.Headers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>?
+ProtoBuf.Connect.ConnectCallOptions.Headers.init -> void
+ProtoBuf.Connect.ConnectCallOptions.HttpVersion.get -> System.Version?
+ProtoBuf.Connect.ConnectCallOptions.HttpVersion.init -> void
+ProtoBuf.Connect.ConnectCallOptions.Timeout.get -> System.TimeSpan?
+ProtoBuf.Connect.ConnectCallOptions.Timeout.init -> void
+ProtoBuf.Connect.ConnectCallOptions.UseGet.get -> bool?
+ProtoBuf.Connect.ConnectCallOptions.UseGet.init -> void
+ProtoBuf.Connect.ConnectCallResult
+ProtoBuf.Connect.ConnectCallResult.Headers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.ConnectCallResult.Trailers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.ConnectChannel
+ProtoBuf.Connect.ConnectChannel.ClientStreamingAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+ProtoBuf.Connect.ConnectChannel.ClientStreamingWithMetadataAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(TResponse Response, ProtoBuf.Connect.ConnectCallResult! Call)>!
+ProtoBuf.Connect.ConnectChannel.Codec.get -> ProtoBuf.Connect.ConnectCodec!
+ProtoBuf.Connect.ConnectChannel.ConnectChannel(System.Net.Http.HttpClient! http, ProtoBuf.Connect.ConnectCodec! codec, System.Uri? baseAddress = null, System.Version? httpVersion = null, ProtoBuf.Connect.ConnectCompression? compression = null, bool useGet = false) -> void
+ProtoBuf.Connect.ConnectChannel.DuplexAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ProtoBuf.Connect.ConnectServerStream<TResponse>!>!
+ProtoBuf.Connect.ConnectChannel.Duplex<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, System.Collections.Generic.IAsyncEnumerable<TRequest>! requests, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResponse>!
+ProtoBuf.Connect.ConnectChannel.ServerStreamingAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, TRequest request, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ProtoBuf.Connect.ConnectServerStream<TResponse>!>!
+ProtoBuf.Connect.ConnectChannel.ServerStreaming<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, TRequest request, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResponse>!
+ProtoBuf.Connect.ConnectChannel.UnaryAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, TRequest request, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse>!
+ProtoBuf.Connect.ConnectChannel.UnaryWithMetadataAsync<TRequest, TResponse>(ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>! method, TRequest request, ProtoBuf.Connect.ConnectCallOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(TResponse Response, ProtoBuf.Connect.ConnectCallResult! Call)>!
+ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Aborted = 10 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.AlreadyExists = 6 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCodec
+ProtoBuf.Connect.ConnectCode.Cancelled = 1 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCodec.ConnectCodec() -> void
+ProtoBuf.Connect.ConnectCodec.ContentTypeFor(ProtoBuf.Connect.ConnectMethodType type) -> string!
+ProtoBuf.Connect.ConnectCodec.Measure<T>(T value, ProtoBuf.Connect.IConnectMessageCodec<T>? over = null) -> long?
+ProtoBuf.Connect.ConnectCodec.Read<T>(in System.Buffers.ReadOnlySequence<byte> source, ProtoBuf.Connect.IConnectMessageCodec<T>? over = null) -> T
+ProtoBuf.Connect.ConnectCodec.Write<T>(System.Buffers.IBufferWriter<byte>! destination, T value, ProtoBuf.Connect.IConnectMessageCodec<T>? over = null) -> void
+ProtoBuf.Connect.ConnectCode.DataLoss = 15 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.DeadlineExceeded = 4 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.FailedPrecondition = 9 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Internal = 13 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.InvalidArgument = 3 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.NotFound = 5 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Ok = 0 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.OutOfRange = 11 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.PermissionDenied = 7 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.ResourceExhausted = 8 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCodes
+ProtoBuf.Connect.ConnectCode.Unauthenticated = 16 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Unavailable = 14 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Unimplemented = 12 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCode.Unknown = 2 -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectCompression
+ProtoBuf.Connect.ConnectCompression.ConnectCompression() -> void
+ProtoBuf.Connect.ConnectEnvelope
+ProtoBuf.Connect.ConnectErrorDetail
+ProtoBuf.Connect.ConnectErrorDetail.ConnectErrorDetail(string! TypeName, byte[]! Value) -> void
+ProtoBuf.Connect.ConnectErrorDetail.ConnectErrorDetail() -> void
+ProtoBuf.Connect.ConnectErrorDetail.Deconstruct(out string! TypeName, out byte[]! Value) -> void
+ProtoBuf.Connect.ConnectErrorDetail.Equals(ProtoBuf.Connect.ConnectErrorDetail other) -> bool
+ProtoBuf.Connect.ConnectErrorDetail.TypeName.get -> string!
+ProtoBuf.Connect.ConnectErrorDetail.TypeName.init -> void
+ProtoBuf.Connect.ConnectErrorDetail.Value.get -> byte[]!
+ProtoBuf.Connect.ConnectErrorDetail.Value.init -> void
+ProtoBuf.Connect.ConnectException
+ProtoBuf.Connect.ConnectException.Code.get -> ProtoBuf.Connect.ConnectCode
+ProtoBuf.Connect.ConnectException.CodeWasInferred.get -> bool
+ProtoBuf.Connect.ConnectException.ConnectException(ProtoBuf.Connect.ConnectCode code, string? message = null, int? httpStatus = null, System.Collections.Generic.IReadOnlyList<ProtoBuf.Connect.ConnectErrorDetail>? details = null, bool codeWasInferred = false, System.Exception? innerException = null) -> void
+ProtoBuf.Connect.ConnectException.Details.get -> System.Collections.Generic.IReadOnlyList<ProtoBuf.Connect.ConnectErrorDetail>!
+ProtoBuf.Connect.ConnectException.Headers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.ConnectException.Headers.init -> void
+ProtoBuf.Connect.ConnectException.HttpStatus.get -> int?
+ProtoBuf.Connect.ConnectException.RawMessage.get -> string?
+ProtoBuf.Connect.ConnectException.Trailers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.ConnectException.Trailers.init -> void
+ProtoBuf.Connect.ConnectMethod
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.ConnectMethod(ProtoBuf.Connect.ConnectMethodType type, string! serviceName, string! methodName, bool idempotent = false, ProtoBuf.Connect.IConnectMessageCodec<TRequest>? requestCodec = null, ProtoBuf.Connect.IConnectMessageCodec<TResponse>? responseCodec = null) -> void
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.IsIdempotent.get -> bool
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.MethodName.get -> string!
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.Path.get -> string!
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.RelativePath.get -> string!
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.RequestCodec.get -> ProtoBuf.Connect.IConnectMessageCodec<TRequest>?
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.ResponseCodec.get -> ProtoBuf.Connect.IConnectMessageCodec<TResponse>?
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.ServiceName.get -> string!
+ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>.Type.get -> ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectMethodType.ClientStreaming = 1 -> ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectMethodType.DuplexStreaming = 3 -> ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectMethodType.ServerStreaming = 2 -> ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectMethodType.Unary = 0 -> ProtoBuf.Connect.ConnectMethodType
+ProtoBuf.Connect.ConnectServerStream<TResponse>
+ProtoBuf.Connect.ConnectServerStream<TResponse>.GetAsyncEnumerator(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerator<TResponse>!
+ProtoBuf.Connect.ConnectServerStream<TResponse>.Headers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.ConnectServerStream<TResponse>.Trailers.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+ProtoBuf.Connect.IConnectMessageCodec<T>
+ProtoBuf.Connect.IConnectMessageCodec<T>.CodecName.get -> string!
+ProtoBuf.Connect.IConnectMessageCodec<T>.Measure(T value) -> long?
+ProtoBuf.Connect.IConnectMessageCodec<T>.Read(in System.Buffers.ReadOnlySequence<byte> source) -> T
+ProtoBuf.Connect.IConnectMessageCodec<T>.Write(System.Buffers.IBufferWriter<byte>! destination, T value) -> void
+ProtoBuf.Connect.IJsonModel
+ProtoBuf.Connect.IJsonModel.GetJsonSerializer<T>() -> ProtoBuf.Connect.IJsonSerializer<T>?
+ProtoBuf.Connect.IJsonSerializer<T>
+ProtoBuf.Connect.IJsonSerializer<T>.Read(ref System.Text.Json.Utf8JsonReader reader, T value) -> T
+ProtoBuf.Connect.IJsonSerializer<T>.Write(System.Text.Json.Utf8JsonWriter! writer, T value) -> void
+ProtoBuf.Connect.JsonConnectCodec
+ProtoBuf.Connect.JsonConnectCodec.JsonConnectCodec(ProtoBuf.Connect.IJsonModel! model) -> void
+ProtoBuf.Connect.MarshallerConnectCodec
+ProtoBuf.Connect.MarshallerConnectCodec.MarshallerConnectCodec() -> void
+ProtoBuf.Connect.MarshallerMessageCodec<T>
+ProtoBuf.Connect.MarshallerMessageCodec<T>.CodecName.get -> string!
+ProtoBuf.Connect.MarshallerMessageCodec<T>.Marshaller.get -> Grpc.Core.Marshaller<T>!
+ProtoBuf.Connect.MarshallerMessageCodec<T>.MarshallerMessageCodec(Grpc.Core.Marshaller<T>! marshaller) -> void
+ProtoBuf.Connect.MarshallerMessageCodec<T>.Measure(T value) -> long?
+ProtoBuf.Connect.MarshallerMessageCodec<T>.Read(in System.Buffers.ReadOnlySequence<byte> source) -> T
+ProtoBuf.Connect.MarshallerMessageCodec<T>.Write(System.Buffers.IBufferWriter<byte>! destination, T value) -> void
+ProtoBuf.Connect.NoSideEffectsAttribute
+ProtoBuf.Connect.NoSideEffectsAttribute.NoSideEffectsAttribute() -> void
+ProtoBuf.Connect.ProtoConnectAttribute
+ProtoBuf.Connect.ProtoConnectAttribute.Model.get -> System.Type?
+ProtoBuf.Connect.ProtoConnectAttribute.Model.set -> void
+ProtoBuf.Connect.ProtoConnectAttribute.ProtoConnectAttribute() -> void
+ProtoBuf.Connect.ProtoConnectCodec
+ProtoBuf.Connect.ProtoConnectCodec.ProtoConnectCodec(ProtoBuf.Meta.TypeModel! model) -> void
+ProtoBuf.Connect.ProtoMessageCodec<T>
+ProtoBuf.Connect.ProtoMessageCodec<T>.CodecName.get -> string!
+ProtoBuf.Connect.ProtoMessageCodec<T>.Measure(T value) -> long?
+ProtoBuf.Connect.ProtoMessageCodec<T>.ProtoMessageCodec(ProtoBuf.Meta.TypeModel! model, ProtoBuf.Serializers.ISerializer<T>! serializer) -> void
+ProtoBuf.Connect.ProtoMessageCodec<T>.Read(in System.Buffers.ReadOnlySequence<byte> source) -> T
+ProtoBuf.Connect.ProtoMessageCodec<T>.Write(System.Buffers.IBufferWriter<byte>! destination, T value) -> void
+static ProtoBuf.Connect.ConnectCallOptions.From(in Grpc.Core.CallOptions options) -> ProtoBuf.Connect.ConnectCallOptions?
+static ProtoBuf.Connect.ConnectCodes.FromHttpStatus(int status) -> ProtoBuf.Connect.ConnectCode
+static ProtoBuf.Connect.ConnectCodes.FromWireName(string? name) -> ProtoBuf.Connect.ConnectCode
+static ProtoBuf.Connect.ConnectCodes.ToHttpStatus(this ProtoBuf.Connect.ConnectCode code) -> int
+static ProtoBuf.Connect.ConnectCodes.ToWireName(this ProtoBuf.Connect.ConnectCode code) -> string!
+static ProtoBuf.Connect.ConnectCodes.TryFromWireName(string? name, out ProtoBuf.Connect.ConnectCode code) -> bool
+static ProtoBuf.Connect.ConnectCompression.Brotli.get -> ProtoBuf.Connect.ConnectCompression!
+static ProtoBuf.Connect.ConnectCompression.Deflate.get -> ProtoBuf.Connect.ConnectCompression!
+static ProtoBuf.Connect.ConnectCompression.Gzip.get -> ProtoBuf.Connect.ConnectCompression!
+static ProtoBuf.Connect.ConnectCompression.Identity.get -> ProtoBuf.Connect.ConnectCompression!
+static ProtoBuf.Connect.ConnectCompression.IsIdentity(string? name) -> bool
+static ProtoBuf.Connect.ConnectEnvelope.TryRead(ref System.Buffers.ReadOnlySequence<byte> buffer, out byte flags, out System.Buffers.ReadOnlySequence<byte> payload) -> bool
+static ProtoBuf.Connect.ConnectEnvelope.WriteHeader(System.Buffers.IBufferWriter<byte>! destination, byte flags, int payloadLength) -> void
+static ProtoBuf.Connect.ConnectEnvelope.WriteMessage<T>(System.Buffers.IBufferWriter<byte>! destination, ProtoBuf.Connect.ConnectCodec! codec, T value, ProtoBuf.Connect.IConnectMessageCodec<T>? over = null, byte flags = 0, ProtoBuf.Connect.ConnectCompression? compression = null) -> void
+static ProtoBuf.Connect.ConnectErrorDetail.operator !=(ProtoBuf.Connect.ConnectErrorDetail left, ProtoBuf.Connect.ConnectErrorDetail right) -> bool
+static ProtoBuf.Connect.ConnectErrorDetail.operator ==(ProtoBuf.Connect.ConnectErrorDetail left, ProtoBuf.Connect.ConnectErrorDetail right) -> bool
+static ProtoBuf.Connect.ConnectException.FromRpcException(Grpc.Core.RpcException! exception) -> ProtoBuf.Connect.ConnectException!
+static ProtoBuf.Connect.ConnectException.ToStatusCode(ProtoBuf.Connect.ConnectCode code) -> Grpc.Core.StatusCode
+static ProtoBuf.Connect.ConnectMethod.FromGrpc<TRequest, TResponse>(Grpc.Core.Method<TRequest, TResponse>! method, bool idempotent = false) -> ProtoBuf.Connect.ConnectMethod<TRequest, TResponse>!
+static ProtoBuf.Connect.MarshallerConnectCodec.Instance.get -> ProtoBuf.Connect.MarshallerConnectCodec!
+virtual ProtoBuf.Connect.ConnectCompression.MinimumSize.get -> int

@@ -43,7 +43,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+        <!-- No Microsoft.SourceLink.GitHub reference: the SDK has included Source Link by default
+             since 8.0.100, so an explicit one only overrides the SDK's version with a hand-managed
+             one - which is a maintenance burden and a place for a transitive advisory to need
+             chasing. Verified rather than assumed: packing with and without produces a byte-identical
+             *.sourcelink.json and the same nuspec <repository> element, commit and all.
+             Following StackExchange.Redis#3222. -->
         <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" />
     </ItemGroup>
 </Project>

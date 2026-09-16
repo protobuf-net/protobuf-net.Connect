@@ -1,7 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/AArnott/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
-  "version": "0.1-alpha",
-  "assemblyVersion": "0.1",
+  "version": "1.0",
+  // without this the first commit carrying a new version is height 1, so 1.0 would ship as 1.0.1 and
+  // there would never be a 1.0.0; protobuf-net's version.json carries the same offset for the same
+  // reason. Note it applies from the commit that changed "version", not from the repo's first commit.
+  "versionHeightOffset": -1,
+  "assemblyVersion": "1.0",
   "nugetPackageVersion": {
     "semVer": 2
   },
