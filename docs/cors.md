@@ -86,6 +86,6 @@ A side-effect-free method can be served over `GET`, which is why `GET` is in the
 that a Connect GET **bypasses preflight entirely** — it sets no request headers — so it needs only
 `Access-Control-Allow-Origin` on the response.
 
-> ⚠️ Connect GET is currently reachable on the **contract-first** path only; see
-> [contract-first](contract-first#idempotency-and-get). The code-first generator does not yet mark a
-> method side-effect-free, so `useGet` has nothing to act on there.
+Declare it with `[NoSideEffects]` on the contract method
+([code-first](getting-started#cacheable-calls-nosideeffects)) or `option idempotency_level =
+NO_SIDE_EFFECTS;` in the `.proto` ([contract-first](contract-first#idempotency-and-get)).

@@ -9,6 +9,8 @@ namespace ProtoBuf.ConnectCorsChecks;
 [Service("cors.v1.Greeter")]
 public interface IGreeter
 {
+    /// <summary>Side-effect-free, so it is bound for GET as well as POST - Connect's cacheable form.</summary>
+    [NoSideEffects]
     Task<HelloReply> SayHelloAsync(HelloRequest request, CallContext context = default);
 
     /// <summary>Sets trailing metadata, which on a unary call becomes a <c>trailer-</c> header.</summary>
@@ -39,13 +41,10 @@ public class GreeterService : IGreeter
     }
 }
 
-// The seeds are explicit, and have to be: [ProtoConnect] does NOT seed the model the way [ProtoGrpc]
-// does (GrpcProxyGenerator.CollectPayloadsForModel has no Connect equivalent), so a Connect-only
-// code-first project gets an empty model - and an empty model emits nothing at all, including
-// `Instance`, so the failure is CS0117 in generated code rather than a diagnostic.
+// No explicit seeds: [ProtoConnect] seeds the model from its [ProtoService] contracts, exactly as
+// [ProtoGrpc] does. This project is the regression test for that - it was written from
+// docs/getting-started.md step by step, which is how the gap was found in the first place.
 [ProtoModel]
-[ProtoSerializable(typeof(HelloRequest))]
-[ProtoSerializable(typeof(HelloReply))]
 public partial class CorsModel : TypeModel { }
 
 [ProtoConnect(Model = typeof(CorsModel))]

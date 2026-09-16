@@ -18,6 +18,8 @@ namespace ProtoBuf.Connect.AspNetCore
     /// </summary>
     public static class ConnectEndpointRouteBuilderExtensions
     {
+        private static readonly string[] GetAndPost = { "GET", "POST" };
+
         /// <summary>
         /// Maps every method a service declares, as one endpoint each.
         /// </summary>
@@ -39,8 +41,6 @@ namespace ProtoBuf.Connect.AspNetCore
         /// host - the two use identical paths otherwise, so mapping both at the root puts two endpoints
         /// on one route, and the duplicated path then answers 500 at request time.
         /// </param>
-        private static readonly string[] GetAndPost = { "GET", "POST" };
-
         /// <inheritdoc cref="MapConnectService{TImplementation}(IEndpointRouteBuilder, IConnectServiceBinder{TImplementation}, string?)"/>
         public static IEndpointConventionBuilder MapConnectService<TImplementation>(
             this IEndpointRouteBuilder endpoints,

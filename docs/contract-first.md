@@ -115,3 +115,6 @@ app.MapConnectService<GreeterImpl>(Greeter.BindService,
 
 Only `NO_SIDE_EFFECTS` qualifies. `IDEMPOTENT` means "safe to retry", which is weaker than "safe to
 cache and prefetch" — a delete is idempotent and must emphatically not be a `GET`.
+
+The code-first equivalent is `[NoSideEffects]` on the contract method; see
+[getting started](getting-started#cacheable-calls-nosideeffects).

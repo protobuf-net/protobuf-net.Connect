@@ -3518,5 +3518,32 @@ follows `docs/getting-started.md` step for step, which nothing else here does.
    on the contract-first path only, via `GoogleIdempotency.For(...)`.
 
 Both fixes are in **protobuf-net**, not here, so both need a release of that before a consumer sees
-them. Recorded rather than fixed in passing: the first changes seeding behaviour and the second is API
-design (an attribute, and where it lives).
+them.
+
+### Both fixed
+
+1. `CollectPayloadsForModel` now walks `[ProtoConnect]` as well as `[ProtoGrpc]`. The two declarations
+   are the same shape - a `Model` naming a `[ProtoModel]`, plus `[ProtoService]` attributes - so the
+   walk is shared rather than duplicated, and the helpers it uses (`NamesModel`, `GetContracts`) were
+   already attribute-agnostic. `tests/ConnectCors` is the regression test: it declares a bare
+   `[ProtoModel]` with no `[ProtoSerializable]` seeds, exactly as the guide does.
+
+2. `[NoSideEffects]` is the code-first spelling, and lives in **protobuf-net.Connect** beside
+   `[ProtoConnect]` (matched by full name, so BuildTools needs no reference to it). The generator emits
+   `idempotent: true` into the method descriptor, which is what both the server binding and the
+   client's `useGet` already consulted - so nothing downstream changed.
+
+   **The name was the decision.** `[Idempotent]` would have been the obvious choice and is wrong: the
+   proto option has three levels and only `NO_SIDE_EFFECTS` qualifies, because `IDEMPOTENT` means "safe
+   to retry" rather than "safe to cache and prefetch". A delete is idempotent. An attribute named for
+   the weaker property would invite exactly the mistake that matters.
+
+   Connect GET is unary-only, so the attribute elsewhere is reported (`PBN5009`) **and** ignored in the
+   emitted descriptor - reporting without ignoring would bind a GET that cannot work. The
+   `NoSideEffects` flag rides on the shared `GrpcOperationModel` because the shared parse is the only
+   thing holding the contract's symbols; the gRPC emitter simply never asks for it.
+
+`tests/ConnectCors` proves the GET end to end and observes it rather than inferring it: a middleware
+records the HTTP method each route was reached by, so "the client intended a GET" and "the server saw a
+GET" are not confused. The contrast matters as much - a sibling method without the attribute stays POST
+through the same channel.

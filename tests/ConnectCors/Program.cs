@@ -42,16 +42,20 @@ builder.Services.AddCors(options =>
 builder.Services.AddCorsServices();
 
 var app = builder.Build();
+
+// records the HTTP method each Connect route was reached by, so "the GET really was a GET" is
+// observed rather than inferred from the client's intent
+var seenMethods = new Dictionary<string, string>(StringComparer.Ordinal);
+app.Use(async (context, next) =>
+{
+    seenMethods[context.Request.Path] = context.Request.Method;
+    await next();
+});
+
 app.UseCors();
 app.BindCorsServices("plain").RequireCors("connect");
 app.BindCorsServices("extras").RequireCors("connect-extras");
 
-// A plain GET endpoint carrying the same policy, purely so the GET half of the policy can be checked
-// against a route that actually accepts GET. It is NOT a Connect endpoint, and that is the point: the
-// code-first generator never marks a method idempotent (it always emits ConnectMethod(..., idempotent:
-// false)), so no code-first method is bound for GET and Connect GET cannot be exercised from here at
-// all. See notes/findings.md - that is a gap in the generator, not in this policy.
-app.MapGet("/probe", () => "ok").RequireCors("connect");
 
 await app.StartAsync();
 
@@ -74,20 +78,41 @@ try
         return allowed;
     });
 
-    await Check("the policy allows GET as well as POST, which Connect GET needs", async () =>
+    await Check("the policy allows GET as well as POST, on the Connect route itself", async () =>
     {
-        // against /probe rather than a Connect route: a preflight only gets a policy applied if some
-        // endpoint matches the requested method, and no code-first Connect method is bound for GET
-        using var request = new HttpRequestMessage(HttpMethod.Options, $"{address}/probe");
-        request.Headers.Add("Origin", Origin);
-        request.Headers.Add("Access-Control-Request-Method", "GET");
-        using var response = await http.SendAsync(request);
-
+        // the route really does accept GET, because SayHello is [NoSideEffects]; a preflight only gets
+        // a policy applied if some endpoint matches the requested method, so this would be refused
+        // outright if the method were bound POST-only
+        var response = await Preflight(http, "plain", "GET", "content-type");
         Require(Allowed(response), "the preflight is allowed");
         var methods = Header(response, "Access-Control-Allow-Methods");
         Require(methods.Contains("GET", StringComparison.OrdinalIgnoreCase), $"GET is allowed; got '{methods}'");
         Require(methods.Contains("POST", StringComparison.OrdinalIgnoreCase), $"POST is allowed; got '{methods}'");
         return methods;
+    });
+
+    await Check("a Connect GET is routed, answered, and really is a GET", async () =>
+    {
+        // the end-to-end shape a browser cache or CDN sees. Connect GET bypasses preflight entirely -
+        // it sets no request headers - so all it needs from CORS is Allow-Origin on the response
+        var channel = new ProtoBuf.Connect.ConnectChannel(http,
+            new ProtoBuf.Connect.ProtoConnectCodec(CorsModel.Instance),
+            new Uri($"{address}/plain"), useGet: true);
+        var client = CorsServices.CreateClient<IGreeter>(channel);
+
+        var reply = await client.SayHelloAsync(new HelloRequest { Name = "cache" });
+        Require(reply.Message == "hello cache", $"the greeting, was \"{reply.Message}\"");
+
+        var path = "/plain/cors.v1.Greeter/SayHello";
+        Require(seenMethods.TryGetValue(path, out var seen) && seen == "GET",
+            $"the server saw GET, saw '{(seenMethods.TryGetValue(path, out var m) ? m : "nothing")}'");
+
+        // ...and the contrast: WithTrailer is not [NoSideEffects], so it stays POST however it is asked
+        await client.WithTrailerAsync(new HelloRequest { Name = "x" });
+        var otherPath = "/plain/cors.v1.Greeter/WithTrailer";
+        Require(seenMethods.TryGetValue(otherPath, out var other) && other == "POST",
+            $"a method without the attribute stays POST, saw '{other}'");
+        return "GET for the cacheable one, POST for the other";
     });
 
     await Check("NEGATIVE: an application header the policy does not list is NOT echoed back", async () =>

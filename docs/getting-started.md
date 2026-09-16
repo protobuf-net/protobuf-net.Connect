@@ -195,6 +195,39 @@ new ConnectChannel(http, codec, baseAddress,
 quietly not caching is a far better failure than quietly exposing a side-effecting method to
 prefetchers.
 
+## Cacheable calls: `[NoSideEffects]`
+
+A side-effect-free unary method can be served over `GET` as well as `POST` — an ordinary cacheable
+HTTP request, servable from a CDN or a browser cache without reaching the server. That is the one
+thing Connect does which gRPC structurally cannot.
+
+Declare it on the **contract**, since it is a property of the RPC rather than of one implementation:
+
+```csharp
+using ProtoBuf.Connect;
+
+[Service("mypackage.v1.Greeter")]
+public interface IGreeter
+{
+    [NoSideEffects]
+    Task<HelloReply> GetGreetingAsync(HelloRequest request, CallContext context = default);
+}
+```
+
+The server then binds that method for `GET` as well as `POST`, and a channel created with
+`useGet: true` will use it. Everything else stays `POST`.
+
+> **The name is deliberate**, and `[Idempotent]` was rejected for it. The proto option this mirrors —
+> `option idempotency_level = NO_SIDE_EFFECTS;` — has three levels and only that one qualifies.
+> `IDEMPOTENT` means "safe to retry", which is strictly weaker than "safe to cache and prefetch": a
+> delete is idempotent and must emphatically not be a `GET`.
+
+Connect GET is unary-only — there is no way to carry a stream in a query string — so the attribute on
+any other method shape is reported as **PBN5009** rather than silently ignored.
+
+Contract-first services declare this in the `.proto` instead; see
+[contract-first](contract-first#idempotency-and-get).
+
 ## Errors
 
 Throw `RpcException` and the code, message and details arrive at the caller as a Connect error:
