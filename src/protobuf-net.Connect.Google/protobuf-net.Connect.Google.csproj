@@ -4,9 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ProtoBuf.Connect.Google</RootNamespace>
     <AssemblyName>protobuf-net.Connect.Google</AssemblyName>
-    <Nullable>enable</Nullable>
-    <Description>Canonical protobuf JSON for Connect, over Google.Protobuf messages - experimental</Description>
-    <!-- ships; see protobuf-net.Connect.csproj on the missing ApiCompat baseline -->
+    <Description>Canonical protobuf JSON for Connect, over Google.Protobuf messages</Description>
+    <!-- ships; see protobuf-net.Connect.csproj on the package-validation baseline -->
     <IsPackable>true</IsPackable>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
@@ -18,6 +17,11 @@
     <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Grpc.Core.Api" />
     <ProjectReference Include="../protobuf-net.Connect/protobuf-net.Connect.csproj" PrivateAssets="none" />
+  </ItemGroup>
+
+  <ItemGroup Label="public API tracking">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI/PublicAPI.*.txt" />
   </ItemGroup>
 
 </Project>

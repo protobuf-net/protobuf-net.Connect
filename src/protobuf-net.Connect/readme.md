@@ -1,6 +1,6 @@
 # protobuf-net.Connect
 
-**Experimental.** A **.NET implementation** of the [Connect protocol](https://connectrpc.com)
+A **.NET implementation** of the [Connect protocol](https://connectrpc.com)
 client — Connect being the cross-language protocol with implementations for Go, TypeScript, Swift and
 others — built for native AOT from the start: no ref-emit, no runtime marshaller lookup, no
 reflection on any calling path. It calls any conforming Connect server, whatever it is written in.

@@ -1,6 +1,6 @@
 # protobuf-net.Connect
 
-**Experimental.** A **.NET implementation** of the [Connect protocol](https://connectrpc.com) — the
+A **.NET implementation** of the [Connect protocol](https://connectrpc.com) — the
 cross-language protocol with implementations for Go, TypeScript, Swift and others — built for AOT
 from the start: no ref-emit, no runtime marshaller lookup, no reflection on any serving or calling
 path. Nothing here is .NET-specific on the wire; these services and clients interoperate with every
@@ -168,12 +168,16 @@ any of them names this library's code.
 
 ## Status
 
-Experimental, and versioned `0.1-alpha` to say so. The protocol surface is complete — all four method
-shapes, both codecs, compression, deadlines, metadata, errors with details, and Connect GET — and the
-remaining gaps are recorded rather than hidden in `notes/findings.md`:
+**1.0.** The protocol surface is complete — all four method shapes, both codecs, compression,
+deadlines, metadata, errors with details, and Connect GET — and it passes the full conformance suite
+in both directions against the reference implementation. The public API is declared in
+`PublicAPI.Shipped.txt` and enforced at build time, so it cannot move by accident.
+
+What is *not* here is recorded rather than hidden, in `notes/findings.md`:
 
 - auto-tuple contracts have no code-first JSON mapping yet (refused with a diagnostic, not silently);
-- endpoint metadata inference for contract-first (see the warning above);
+- endpoint metadata inference for contract-first (see the warning above) — the code-first path carries
+  it, and `PBN5007` catches the contract-first case;
 - `zstd`, `snappy`, TLS client certificates.
 
 ## Layout

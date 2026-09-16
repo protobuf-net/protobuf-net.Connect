@@ -4,9 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ProtoBuf.Connect.AspNetCore</RootNamespace>
     <AssemblyName>protobuf-net.Connect.AspNetCore</AssemblyName>
-    <Nullable>enable</Nullable>
-    <Description>Connect protocol (connectrpc.com) server for protobuf-net, on ASP.NET Core - experimental</Description>
-    <!-- ships; see protobuf-net.Connect.csproj on the missing ApiCompat baseline -->
+    <Description>Connect protocol (connectrpc.com) server for protobuf-net, on ASP.NET Core</Description>
+    <!-- ships; see protobuf-net.Connect.csproj on the package-validation baseline -->
     <IsPackable>true</IsPackable>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
@@ -28,6 +27,11 @@
          most, because a contract-first consumer references only this package - it has no reason to
          name protobuf-net at all - and PBN5007 is aimed squarely at that consumer. -->
     <ProjectReference Include="../protobuf-net.Connect/protobuf-net.Connect.csproj" PrivateAssets="none" />
+  </ItemGroup>
+
+  <ItemGroup Label="public API tracking">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI/PublicAPI.*.txt" />
   </ItemGroup>
 
 </Project>

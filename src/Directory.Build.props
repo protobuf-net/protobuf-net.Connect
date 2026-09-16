@@ -31,10 +31,12 @@
              thing that finds it, and must not claim it twice -->
         <DefaultItemExcludes>$(DefaultItemExcludes);readme.md</DefaultItemExcludes>
 
-        <!-- nothing has been published yet, so there is no surface to diff against. Set this once
-             there is a release, and ApiCompat starts failing the build on a removed or narrowed
-             member instead of letting it ship. -->
-        <!-- <PackageValidationBaselineVersion>0.1.0</PackageValidationBaselineVersion> -->
+        <!-- The second half of API tracking, and it deliberately lags the first. PublicAPI.Shipped.txt
+             (enforced at build time, per project) catches an accidental *addition* in review; package
+             validation catches a removal or narrowing against a *published* baseline - which means it
+             wants a GA version to point at. Uncomment with 1.0.0 once that is on nuget.org; pointing it
+             at 0.1.8-alpha would baseline exactly the surface 1.0 supersedes. -->
+        <!-- <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion> -->
     </PropertyGroup>
 
     <ItemGroup>

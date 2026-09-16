@@ -1,0 +1,8 @@
+#nullable enable
+override ProtoBuf.Connect.Google.GoogleJsonConnectCodec.Name.get -> string!
+ProtoBuf.Connect.Google.GoogleIdempotency
+ProtoBuf.Connect.Google.GoogleJsonConnectCodec
+ProtoBuf.Connect.Google.GoogleJsonConnectCodec.GoogleJsonConnectCodec(Google.Protobuf.JsonFormatter? formatter = null, Google.Protobuf.JsonParser? parser = null) -> void
+static ProtoBuf.Connect.Google.GoogleIdempotency.For(Google.Protobuf.Reflection.ServiceDescriptor! service) -> System.Func<Grpc.Core.IMethod!, bool>!
+static ProtoBuf.Connect.Google.GoogleIdempotency.IsIdempotent(Google.Protobuf.Reflection.MethodDescriptor? method) -> bool
+static ProtoBuf.Connect.Google.GoogleJsonConnectCodec.Instance.get -> ProtoBuf.Connect.Google.GoogleJsonConnectCodec!

@@ -72,6 +72,21 @@ thing that actually exercises the package boundary the split introduced. If a ge
 needed here, it has to ship in a protobuf-net release first; that is the cost, and it is the reason
 the generator **probes** for types rather than naming them.
 
+## Two deliberate absences
+
+**No `[module: SkipLocalsInit]`**, unlike protobuf-net, which applies it in three assemblies. It is not
+an oversight and should not be added "for consistency": the whole library contains exactly one
+`stackalloc`, of `ConnectEnvelope.HeaderLength` = **5 bytes**. Skipping that zeroing is unmeasurable,
+and `[module: SkipLocalsInit]` requires `<AllowUnsafeBlocks>`, which would move this from "no unsafe
+anywhere" to "unsafe enabled" in exchange for nothing benchmarkable.
+
+**No explicit `Microsoft.SourceLink.GitHub` reference.** The SDK has included Source Link by default
+since 8.0.100, so an explicit one only overrides the SDK's version with a hand-managed one - a
+maintenance burden, and somewhere a transitive advisory has to be chased. Verified rather than assumed
+before removing it: packing with and without produces a byte-identical `*.sourcelink.json` and the same
+nuspec `<repository>` element, commit and all. Following
+[StackExchange.Redis#3222](https://github.com/StackExchange/StackExchange.Redis/pull/3222).
+
 ## What the checks are for
 
 Nothing here is a unit-test suite, and that is deliberate: every defect this code has had was a place
