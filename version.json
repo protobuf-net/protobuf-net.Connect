@@ -1,10 +1,19 @@
 {
   "$schema": "https://raw.githubusercontent.com/AArnott/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
   "version": "1.0",
-  // without this the first commit carrying a new version is height 1, so 1.0 would ship as 1.0.1 and
-  // there would never be a 1.0.0; protobuf-net's version.json carries the same offset for the same
-  // reason. Note it applies from the commit that changed "version", not from the repo's first commit.
-  "versionHeightOffset": -1,
+  // Brings the patch component back to 0 for the first 1.0 release. The height counts commits since
+  // "version" last changed, and by the time this lands there are three: the commit that set 1.0, the
+  // MERGE COMMIT that landed it (PR #1 was merged with a merge commit rather than squashed - that is
+  // the whole reason this is -3 and not -1), and this one.
+  //
+  // !! RESET THIS TO -1 WHENEVER "version" CHANGES !!
+  // The height resets on a version change but the offset does not, so 1.1 with -3 still here computes
+  // a patch of -2 and nbgv throws `ArgumentOutOfRangeException: build ('-2') must be a non-negative
+  // value` - the build fails outright rather than producing a wrong number. Verified, not assumed.
+  //
+  // The durable fix is squash-only merging, as protobuf-net uses: height then counts merged PRs and
+  // an offset of -1 is always right.
+  "versionHeightOffset": -3,
   "assemblyVersion": "1.0",
   "nugetPackageVersion": {
     "semVer": 2
